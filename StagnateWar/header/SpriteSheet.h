@@ -1,6 +1,8 @@
 #pragma once
 #include <SDL3/SDL.h>
 #include <vector>
+#include <string>
+
 class SpriteSheet {
 private:
    std::vector<SDL_Texture*> sprites; 
@@ -9,7 +11,7 @@ private:
 
 public:
    
-   SpriteSheet(std::string imagePath) : imagePath() ;
+   //SpriteSheet(std::string imagePath) : imagePath() ;
    
    void setImagePath() { this->sSprite = sSprite; }
    std::string getImagePath() { return imagePath; }

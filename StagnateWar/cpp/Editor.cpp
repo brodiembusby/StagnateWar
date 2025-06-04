@@ -20,7 +20,7 @@ void Editor::renderGrid(SDL_Specific& sdl) {
 void Editor::updateTile(SDL_Event& event) {
    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
       // Get mouse position
-      int mouseX, mouseY;
+      float mouseX, mouseY;
       SDL_GetMouseState(&mouseX, &mouseY);
 
       // Convert mouse position to grid coordinates
