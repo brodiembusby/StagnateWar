@@ -38,7 +38,7 @@ SDL_AppResult SDL_Specific::SDL_AppIterate(void* appstate) {
    lastTick = currentTick;
 
    
-   SDL_SetRenderDrawColor(renderer, 0, 220, 0, 255); // Black background
+   SDL_SetRenderDrawColor(renderer, 220, 220, 022, 255); // Black background
    SDL_RenderClear(renderer);
 
    Game* game = static_cast<Game*>(appstate);
@@ -46,7 +46,6 @@ SDL_AppResult SDL_Specific::SDL_AppIterate(void* appstate) {
       game->render(*this);
    }
 
-   SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red rectangle
    SDL_RenderPresent(renderer);
 
    return SDL_APP_CONTINUE;
@@ -77,9 +76,13 @@ void SDL_Specific::updateCamera(Position& target) {
       camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
    }
 }
+
+
 void SDL_Specific::renderSprite(SpriteSheet sprite, SDL_FRect rect) {
-   SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+   
+   SDL_SetRenderDrawColor(renderer, 100, 0, 0, 255); // Rect colors
    // Adjust the rectangle's position relative to the camera
+   
    SDL_FRect adjustedRect = {
        rect.x - camera.getX(),
        rect.y - camera.getY(),

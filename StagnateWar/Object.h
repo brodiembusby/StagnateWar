@@ -16,20 +16,13 @@ public:
    bool hasCollided(const Object& other) const {
       return SDL_HasRectIntersectionFloat(&rect, &other.rect);
    }
-
-   void animateSprite() {
-      // Placeholder for sprite animation
-   }
-
-   // Getters/Setters for position (which updates rect)
-   Position& getPosition() { return position; }
-   void setPosition(float x, float y) {
+   virtual SpriteSheet& getSprite() { return sprite; }
+   virtual SDL_FRect& getRect() { return rect; }
+   virtual Position& getPosition() { return position; }
+   virtual void setPosition(float x, float y) {
       position.setX(x);
       position.setY(y);
       rect.x = x;
       rect.y = y;
    }
-
-   SDL_FRect& getRect() { return rect; }
-   SpriteSheet& getSprite() { return sprite; }
 };

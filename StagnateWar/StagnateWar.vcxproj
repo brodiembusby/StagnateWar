@@ -140,6 +140,9 @@
     <ClInclude Include="..\..\StagnateWar\StagnateWar\SDL_Specific.h" />
     <ClInclude Include="..\..\StagnateWar\StagnateWar\SpriteSheet.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="Editor.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="Tile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\StagnateWar\StagnateWar\Game.cpp" />
@@ -148,8 +151,11 @@
     <ClCompile Include="..\..\StagnateWar\StagnateWar\Position.cpp" />
     <ClCompile Include="..\..\StagnateWar\StagnateWar\SDL_Specific.cpp" />
     <ClCompile Include="..\..\StagnateWar\StagnateWar\SpriteSheet.cpp" />
+    <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test.h" />
+    <ClCompile Include="Tile.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

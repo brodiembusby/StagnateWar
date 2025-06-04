@@ -3,6 +3,7 @@
 #include "PartyMember.h"
 #include <vector>
 #include "Object.h"
+#include "Editor.h"
 
 class Game {
 private:
@@ -10,6 +11,8 @@ private:
    PartyMember* player;
    PartyMember* enemy;
    SDL_Specific& sdl;
+   Editor editor;
+   bool isEditorMode = false;
 
 public:
    Game(SDL_Specific& sdlSpecific) : sdl(sdlSpecific) {
@@ -29,38 +32,18 @@ public:
       }
    }
 
-   void handleEvent(SDL_Event& event) {
-      
-      float speed = 200.0f; // Pixels per second
-      float deltaTime = sdl.getDeltaTime();
-      
-      if (event.type == SDL_EVENT_KEY_DOWN) {
-         switch (event.key.scancode) {
-         case SDL_SCANCODE_W:
-            player->setPosition(player->getPosition().getX(), player->getPosition().getY() - 10);
-            break;
-         case SDL_SCANCODE_S:
-            player->setPosition(player->getPosition().getX(), player->getPosition().getY() + 10);
-            break;
-         case SDL_SCANCODE_A:
-            player->setPosition(player->getPosition().getX() - 10, player->getPosition().getY());
-            break;
-         case SDL_SCANCODE_D:
-            player->setPosition(player->getPosition().getX() + 10, player->getPosition().getY());
-            break;
-         default:
-            break;
-         }
-      }
-   }
+   void handleEvent(SDL_Event& event);
 
    void render(SDL_Specific& sdl) {
-     
-      sdl.updateCamera(player->getPosition());
 
-      for (Object* obj : objects) {
-         sdl.renderSprite(obj->getSprite(), obj->getRect());         
-      }
-
+         sdl.updateCamera(player->getPosition());
+         //level.render(sdl);
+         for (Object* obj : objects) {
+            sdl.renderSprite(obj->getSprite(), obj->getRect());
+         }
+      
+         if (isEditorMode) {
+            editor.renderGrid(sdl);
+         }
    }
 };
