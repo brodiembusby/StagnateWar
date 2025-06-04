@@ -133,22 +133,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Game.h" />
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Object.h" />
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\PartyMember.h" />
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Position.h" />
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\SDL_Specific.h" />
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\SpriteSheet.h" />
+    <ClInclude Include="..\..\StagnateWar\StagnateWar\Game.h" />
+    <ClInclude Include="..\..\StagnateWar\StagnateWar\Object.h" />
+    <ClInclude Include="..\..\StagnateWar\StagnateWar\PartyMember.h" />
+    <ClInclude Include="..\..\StagnateWar\StagnateWar\Position.h" />
+    <ClInclude Include="..\..\StagnateWar\StagnateWar\SDL_Specific.h" />
+    <ClInclude Include="..\..\StagnateWar\StagnateWar\SpriteSheet.h" />
     <ClInclude Include="constants.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Game.cpp" />
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Object.cpp" />
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\PartyMember.cpp" />
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Position.cpp" />
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\SDL_Specific.cpp" />
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\SpriteSheet.cpp" />
+    <ClCompile Include="..\..\StagnateWar\StagnateWar\Game.cpp" />
+    <ClCompile Include="..\..\StagnateWar\StagnateWar\Object.cpp" />
+    <ClCompile Include="..\..\StagnateWar\StagnateWar\PartyMember.cpp" />
+    <ClCompile Include="..\..\StagnateWar\StagnateWar\Position.cpp" />
+    <ClCompile Include="..\..\StagnateWar\StagnateWar\SDL_Specific.cpp" />
+    <ClCompile Include="..\..\StagnateWar\StagnateWar\SpriteSheet.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

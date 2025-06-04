@@ -8,11 +8,17 @@ class Game {
 private:
    std::vector<Object*> objects;
    PartyMember* player;
+   PartyMember* enemy;
    SDL_Specific& sdl;
 
 public:
    Game(SDL_Specific& sdlSpecific) : sdl(sdlSpecific) {
+      enemy = new PartyMember();
       player = new PartyMember();
+
+      enemy->setPosition(100, 100);
+      objects.push_back(enemy);
+
       player->setPosition(50, 50);
       objects.push_back(player);
    }
@@ -24,6 +30,10 @@ public:
    }
 
    void handleEvent(SDL_Event& event) {
+      
+      float speed = 200.0f; // Pixels per second
+      float deltaTime = sdl.getDeltaTime();
+      
       if (event.type == SDL_EVENT_KEY_DOWN) {
          switch (event.key.scancode) {
          case SDL_SCANCODE_W:
@@ -45,8 +55,12 @@ public:
    }
 
    void render(SDL_Specific& sdl) {
+     
+      sdl.updateCamera(player->getPosition());
+
       for (Object* obj : objects) {
-         sdl.renderSprite(obj->getSprite(), obj->getRect());
+         sdl.renderSprite(obj->getSprite(), obj->getRect());         
       }
+
    }
 };

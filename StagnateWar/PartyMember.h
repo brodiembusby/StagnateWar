@@ -80,7 +80,7 @@ public:
    // void applyStatusEffect(StatusEffect status) {effects.push_back(status);}
 };
 
-// Placeholder implementation for removeItem (to avoid linker errors)
-void Inventory::removeItem(Item item) {
-   // TODO: Implement removal logic
-}
+//// Placeholder implementation for removeItem (to avoid linker errors)
+//void Inventory::removeItem(Item item) {
+//   // TODO: Implement removal logic
+//}
