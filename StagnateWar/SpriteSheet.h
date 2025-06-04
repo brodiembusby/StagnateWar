@@ -3,8 +3,18 @@
 #include <vector>
 class SpriteSheet {
 private:
-   std::vector<SDL_Texture*> sprites; // Fixed to pointer for SDL_Texture
+   std::vector<SDL_Texture*> sprites; 
+   SDL_Texture sSprite;
+   std::string imagePath;
 
 public:
-   SpriteSheet() = default;
+   
+   SpriteSheet(std::string imagePath) : imagePath() ;
+   
+   void setImagePath() { this->sSprite = sSprite; }
+   std::string getImagePath() { return imagePath; }
+
+   SDL_Texture getSprite() { return sSprite; }
+   
+
 };
