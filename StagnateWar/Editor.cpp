@@ -22,7 +22,6 @@ void Editor::updateTile(SDL_Event& event) {
       // Get mouse position
       float mouseX, mouseY;
       SDL_GetMouseState(&mouseX, &mouseY);
-
       // Convert mouse position to grid coordinates
       int gridX = mouseX / 50; // 800 / 50 = 16 columns
       int gridY = mouseY / 50; // 600 / 50 = 12 rows

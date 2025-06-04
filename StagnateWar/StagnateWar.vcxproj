@@ -18,6 +18,31 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="constants.h" />
+    <ClInclude Include="Editor.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="PartyMember.h" />
+    <ClInclude Include="Position.h" />
+    <ClInclude Include="SDL_Specific.h" />
+    <ClInclude Include="SpriteSheet.h" />
+    <ClInclude Include="test.h" />
+    <ClInclude Include="Tile.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="PartyMember.cpp" />
+    <ClCompile Include="Position.cpp" />
+    <ClCompile Include="SDL_Specific.cpp" />
+    <ClCompile Include="SpriteSheet.cpp" />
+    <ClCompile Include="Tile.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -132,31 +157,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\StagnateWar\StagnateWar\Game.h" />
-    <ClInclude Include="..\..\StagnateWar\StagnateWar\Object.h" />
-    <ClInclude Include="..\..\StagnateWar\StagnateWar\PartyMember.h" />
-    <ClInclude Include="..\..\StagnateWar\StagnateWar\Position.h" />
-    <ClInclude Include="..\..\StagnateWar\StagnateWar\SDL_Specific.h" />
-    <ClInclude Include="..\..\StagnateWar\StagnateWar\SpriteSheet.h" />
-    <ClInclude Include="constants.h" />
-    <ClInclude Include="Editor.h" />
-    <ClInclude Include="Level.h" />
-    <ClInclude Include="Tile.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\StagnateWar\StagnateWar\Game.cpp" />
-    <ClCompile Include="..\..\StagnateWar\StagnateWar\Object.cpp" />
-    <ClCompile Include="..\..\StagnateWar\StagnateWar\PartyMember.cpp" />
-    <ClCompile Include="..\..\StagnateWar\StagnateWar\Position.cpp" />
-    <ClCompile Include="..\..\StagnateWar\StagnateWar\SDL_Specific.cpp" />
-    <ClCompile Include="..\..\StagnateWar\StagnateWar\SpriteSheet.cpp" />
-    <ClCompile Include="Editor.cpp" />
-    <ClCompile Include="Level.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="test.h" />
-    <ClCompile Include="Tile.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
