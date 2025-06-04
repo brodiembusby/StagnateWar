@@ -27,13 +27,13 @@
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Position.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Rectangle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\SDL_Specific.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\SpriteSheet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -48,9 +48,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Position.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Rectangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\SDL_Specific.cpp">

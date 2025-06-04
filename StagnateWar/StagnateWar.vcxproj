@@ -137,16 +137,15 @@
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Object.h" />
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\PartyMember.h" />
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Position.h" />
-    <ClInclude Include="..\..\SDL_Demo\SDL_Demo\Rectangle.h" />
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\SDL_Specific.h" />
     <ClInclude Include="..\..\SDL_Demo\SDL_Demo\SpriteSheet.h" />
+    <ClInclude Include="constants.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Game.cpp" />
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Object.cpp" />
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\PartyMember.cpp" />
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Position.cpp" />
-    <ClCompile Include="..\..\SDL_Demo\SDL_Demo\Rectangle.cpp" />
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\SDL_Specific.cpp" />
     <ClCompile Include="..\..\SDL_Demo\SDL_Demo\SpriteSheet.cpp" />
     <ClCompile Include="main.cpp" />
