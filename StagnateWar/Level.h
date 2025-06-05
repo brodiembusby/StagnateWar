@@ -15,12 +15,12 @@ public:
    
    void loadLevel(); // Placeholder
    void render(SDL_Specific& sdl) {
-      // Render background first
-      SDL_FRect bgRect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
-      sdl.renderSprite(backgroundSprite, bgRect);
-      // Render tiles
-      for (Tile* tile : tiles) {
-         sdl.renderSprite(tile->getSprite(), tile->getRect());
-      }
+      //// Render background first
+      //SDL_FRect bgRect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
+      //sdl.renderSprite(backgroundSprite, bgRect);
+      //// Render tiles
+      //for (Tile* tile : tiles) {
+      //   sdl.renderSprite(tile->getSprite(), tile->getRect());
+      //}
    }
 };

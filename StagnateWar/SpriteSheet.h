@@ -1,34 +1,26 @@
 #pragma once
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <vector>
 #include <string>
-#include <SDL3/SDL.h>
 
+// Aspect Ration of 4:3
 class SpriteSheet {
 private:
    
-   std::vector<SDL_Texture*> sprites; 
-   SDL_Texture sSprite;
-   std::string path;
-   
-
+   SDL_Surface* image;
+   SDL_Rect mClip;
 
 public:
-   
-   SpriteSheet(std::string path) : path(path) {
-      
-   }
+   SpriteSheet() = default;
 
-   ~SpriteSheet() {
-      if (sSprite) {
-         SDL_DestroyTexture(sSprite);
-         sSprite = nullptr;
-      }
-   }
-   void setImagePath() { this->sSprite = sSprite; }
-   std::string getImagePath() { return path; }
+   //SpriteSheet(char const* path, int row, int column) {
+   //   path = ;
+   SpriteSheet(char const* path, int row, int column);
+   ~SpriteSheet();
 
-   SDL_Texture getSprite() { return sSprite; }
-   
+   void selectSprite(int x, int y);
+   void drawSprite(SDL_Surface* windowSurface, SDL_Rect* position);
+
 
 };

@@ -10,7 +10,6 @@ private:
 
    Tile* level[16][12];
    bool isPlacingWall = false;
-   SpriteSheet defaultSprite;
    SpriteSheet wallSprite;    
 
 public:

@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 #include "SpriteSheet.h"
 #include "Position.h"
+#include "constants.h"
 
 class Object {
 protected:
@@ -10,7 +11,8 @@ protected:
    SDL_FRect rect; 
 
 public:
-   Object() : rect{ 0, 0, 50, 50 } {} // Default size 50x50
+   Object() : rect{ 0, 0, DEFAULT_HEIGHT, DEFAULT_WIDTH } {} // Default size 50x50
+   Object(SpriteSheet sprite) : rect{ 0, 0, DEFAULT_HEIGHT, DEFAULT_WIDTH }, sprite(sprite) {}
    virtual ~Object() = default;
 
    bool hasCollided(const Object& other) const {
