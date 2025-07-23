@@ -1,49 +1,43 @@
 #pragma once
-#include "SDL_Specific.h"
 #include "PartyMember.h"
-#include <vector>
-#include "Object.h"
+#include "Entity.h"
 #include "Editor.h"
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
+#include "TextManager.h"
 
 class Game {
 private:
-   std::vector<Object*> objects;
-   PartyMember* player;
-   PartyMember* enemy;
-   SDL_Specific& sdl;
-   Editor editor;
+
+   SDL_Window* window = nullptr;
+   SDL_Renderer* renderer = nullptr;
+  
+   TTF_Font* font = nullptr;
+   TextManager* textManager = nullptr; // Add TextManager
+
+
+   Position camera;
+
+   // TODO: Temp will be moved later
+   SDL_Texture* playerTexture = nullptr;
+   PartyMember* player = nullptr;
+
    bool isEditorMode = false;
+   float deltaTime = 0.0f;
+   Uint64 lastTick = 0;
 
 public:
-   Game(SDL_Specific& sdlSpecific) : sdl(sdlSpecific) {
-      enemy = new PartyMember();
-      player = new PartyMember();
+   Game();
+   ~Game();
 
-      enemy->setPosition(100, 100);
-      objects.push_back(enemy);
-
-      player->setPosition(50, 50);
-      objects.push_back(player);
-   }
-
-   ~Game() {
-      for (Object* obj : objects) {
-         delete obj;
-      }
-   }
-
+   void gameQuit();
    void handleEvent(SDL_Event& event);
+   SDL_AppResult Run();
+   SDL_AppResult gameInit();
+   SDL_AppResult gameIterate();
+   
+   float getDeltaTime() const { return deltaTime; }
+   void updateCamera(Position& target);
 
-   void render(SDL_Specific& sdl) {
-
-         sdl.updateCamera(player->getPosition());
-         //level.render(sdl);
-         for (Object* obj : objects) {
-            sdl.renderSprite(obj->getSprite(), obj->getRect());
-         }
-      
-         if (isEditorMode) {
-            editor.renderGrid(sdl);
-         }
-   }
 };

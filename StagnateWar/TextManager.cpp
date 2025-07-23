@@ -1,0 +1,55 @@
+#include "TextManager.h"
+
+TextManager::TextManager(TTF_Font* font) : font(font), textTexture(nullptr) {
+}
+
+TextManager::~TextManager() {
+   if (textTexture) {
+      SDL_DestroyTexture(textTexture);
+      textTexture = nullptr;
+   }
+   // Note: Do not destroy the font here, as it's managed by the Game class
+}
+
+void TextManager::display(SDL_Renderer* renderer, const char* textToRender) {
+   // Draw GUI backdrop
+   SDL_FRect GUIBackdrop = { 0.0f, 320.0f, WINDOW_WIDTH, WINDOW_HEIGHT / 3.0f };
+   SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue backdrop
+   SDL_RenderFillRect(renderer, &GUIBackdrop);
+
+   if (!font || !textToRender) {
+      SDL_Log("Font or text is null");
+      return;
+   }
+
+   // Define text color (white)
+   SDL_Color textColor = { 255, 255, 255, 255 };
+
+   // Render text to a surface using TTF_RenderText_Solid for fast rendering
+   SDL_Surface* textSurface = TTF_RenderText_Solid(font, textToRender,0, textColor);
+   if (!textSurface) {
+      SDL_Log("Failed to render text: %s", SDL_GetError());
+      return;
+   }
+
+   // Convert surface to texture
+   textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+   SDL_DestroySurface(textSurface); // Free the surface after creating texture
+   if (!textTexture) {
+      SDL_Log("Failed to create texture from surface: %s", SDL_GetError());
+      return;
+   }
+
+   // Get text dimensions
+   int textWidth, textHeight;
+   TTF_GetStringSize(font, textToRender, 0, &textWidth, &textHeight);
+
+   // Define destination rectangle for text (position it on the backdrop)
+   SDL_FRect textRect = { 10.0f, 330.0f, static_cast<float>(textWidth), static_cast<float>(textHeight) };
+
+   // Render the text texture
+   if (!SDL_RenderTexture(renderer, textTexture, nullptr, &textRect)) {
+      SDL_Log("Failed to render text texture: %s", SDL_GetError());
+   }
+
+}
