@@ -41,6 +41,10 @@ void Game::gameQuit() {
       SDL_DestroyTexture(playerTexture);
       playerTexture = nullptr;
    }
+   if (textManager) {
+      delete textManager;
+      textManager = nullptr;
+   }
    if (player) {
       delete player;
       player = nullptr;
@@ -110,9 +114,15 @@ SDL_AppResult Game::gameInit() {
       return SDL_APP_FAILURE;
 
    }
-   
-   const char* file = "assets/BitcountPropSingle-Regular.ttf";
-   font = TTF_OpenFont(file, 12);
+   /*
+   Fonts I think look good 
+   "assets/BitcountPropSingle_Cursive-ExtraBold.ttf"
+   "assets/BitcountPropSingle_Cursive-Regular"
+   "assets/BitcountPropSingle-SemiBold"
+   */
+   const char* file = "assets/CourierPrime-Regular.ttf";
+   float fontSize = 24;
+   font = TTF_OpenFont(file, fontSize);
    if (!font) {
       SDL_Log("Couldnt open TTF font file: %s", SDL_GetError());
       return SDL_APP_FAILURE;
@@ -147,12 +157,15 @@ SDL_AppResult Game::gameIterate() {
    lastTick = currentTick;
 
    // Clear screen
-   SDL_SetRenderDrawColor(renderer, 220, 220, 22, 255); // Yellowish background
+
+   // This is gross I just wanted to see what it looked like
+   const SDL_Color SAGE_GREEN = { 178, 172, 136, 255 };
+   SDL_SetRenderDrawColor(renderer, SAGE_GREEN.r, SAGE_GREEN.g, SAGE_GREEN.b, SAGE_GREEN.a); 
    SDL_RenderClear(renderer);
 
    // Render Text
    if (textManager) {
-      textManager->display(renderer, "Hello, SDL_ttf!");
+      textManager->display(renderer, "This game is a work in progress.");
    }
 
    if (player) {
