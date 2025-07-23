@@ -21,10 +21,7 @@
     <ClInclude Include="Editor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL_Specific.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
+    <ClInclude Include="Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
@@ -45,7 +42,7 @@
     <ClInclude Include="PartyMember.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="test.h">
+    <ClInclude Include="TextManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,7 +56,7 @@
     <ClCompile Include="Position.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
+    <ClCompile Include="Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PartyMember.cpp">
@@ -68,22 +65,17 @@
     <ClCompile Include="Level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDL_Specific.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Tile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\testSpriteSheet.png">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

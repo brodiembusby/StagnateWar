@@ -1,5 +1,5 @@
 #pragma once
-#include "Object.h"
+#include "Entity.h"
 #include <string>
 
 enum ItemType
@@ -28,27 +28,26 @@ public:
    void setName(std::string name) { this->name = name; }
 
 
-   int getValue() { return value; };
+   int getValue() { return value; }
    void setValue(int value) { this->value = value; }
 };
 
 
-class Inventory {
-
-private:
-   std::vector<Item> inventory ;
-   
-public:
-
-   void addItem(Item item) { inventory.push_back(item); };
-   void removeItem(Item item); // Placeholder
-
-};
-class PartyMember : public Object
+//class Inventory {
+//
+//private:
+//   std::array<Item, 10> inventory;
+//   
+//public:
+//
+//
+//
+//};
+class PartyMember : public Entity
 {
 private:
    Item item;
-   Inventory inventory;
+   //Inventory inventory;
    int health = 100;
    int level = 1;
    int xp = 0;

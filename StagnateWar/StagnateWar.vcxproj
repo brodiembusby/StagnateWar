@@ -23,12 +23,11 @@
     <ClInclude Include="Editor.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Level.h" />
-    <ClInclude Include="Object.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="PartyMember.h" />
     <ClInclude Include="Position.h" />
-    <ClInclude Include="SDL_Specific.h" />
     <ClInclude Include="SpriteSheet.h" />
-    <ClInclude Include="test.h" />
+    <ClInclude Include="TextManager.h" />
     <ClInclude Include="Tile.h" />
   </ItemGroup>
   <ItemGroup>
@@ -36,15 +35,12 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="PartyMember.cpp" />
     <ClCompile Include="Position.cpp" />
-    <ClCompile Include="SDL_Specific.cpp" />
     <ClCompile Include="SpriteSheet.cpp" />
+    <ClCompile Include="TextManager.cpp" />
     <ClCompile Include="Tile.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\..\..\Downloads\testSpriteSheet.png" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -138,7 +134,7 @@
       <AdditionalIncludeDirectories>C:\vslib\SDL3-3.2.10\include;C:\vslib\SDL3_image-3.2.4\include;C:\vslib\SDL3_ttf-3.2.2\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\vslib\SDL3-3.2.10\lib\x64;C:\vslib\SDL3_image-3.2.4\lib\x64;C:\vslib\SDL3_ttf-3.2.2\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;SDL3_test.lib;SDL3_image.lib;SDL3_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
