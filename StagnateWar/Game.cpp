@@ -8,8 +8,8 @@ Game::~Game() {
 }
 
 SDL_AppResult Game::Run() {
-   
-if (gameInit() != SDL_APP_SUCCESS) {
+
+   if (gameInit() != SDL_APP_SUCCESS) {
       return SDL_APP_FAILURE;
    }
 
@@ -35,7 +35,7 @@ if (gameInit() != SDL_APP_SUCCESS) {
 }
 
 void Game::gameQuit() {
-   
+
    //TODO change to array of entityies and auto delete
    if (playerTexture) {
       SDL_DestroyTexture(playerTexture);
@@ -68,9 +68,7 @@ void Game::gameQuit() {
 void Game::handleEvent(SDL_Event& event) {
    float speed = 200.0f; // Pixels per second
    float deltaTime = getDeltaTime();
-
    if (event.type == SDL_EVENT_KEY_DOWN) {
-      if (!player) return; // Guard against null player
       switch (event.key.scancode) {
       case SDL_SCANCODE_W:
          player->setPosition(player->getPosition().getX(), player->getPosition().getY() - 10);
@@ -92,10 +90,19 @@ void Game::handleEvent(SDL_Event& event) {
          break;
       }
    }
+   if (player->hasCollided(*enemy)) {
+
+      showCollisionText = true;
+      const char* testText = "This game is a work in progress.";
+      textManager->setText(testText);
+   }
+   else if(!player->hasCollided(*enemy)) {
+      showCollisionText = false;
+   }
 }
 
 SDL_AppResult Game::gameInit() {
-   
+
    SDL_SetAppMetadata("Stagnate War", "1.0", "Stagnate War");
 
    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -116,7 +123,7 @@ SDL_AppResult Game::gameInit() {
 
    }
    /*
-   Fonts I think look good 
+   Fonts I think look good
    "assets/BitcountPropSingle_Cursive-ExtraBold.ttf"
    "assets/BitcountPropSingle_Cursive-Regular"
    "assets/BitcountPropSingle-SemiBold"
@@ -141,8 +148,8 @@ SDL_AppResult Game::gameInit() {
    if (!SDL_SetWindowIcon(window, icon)) {
       SDL_Log("Failed to set window Icon: %s", SDL_GetError());
    }
-   
-   
+
+
    //TODO auto add members from a array probably based on levelManager
 
 
@@ -155,6 +162,11 @@ SDL_AppResult Game::gameInit() {
    }
 
    player = new PartyMember();
+   player->setPosition(100, 100); // Set initial position
+
+   enemy = new PartyMember();
+   enemy->setPosition(200, 200); // Set initial position
+
    deltaTime = 1.0f / 60.0f;
 
    return SDL_APP_SUCCESS;
@@ -163,25 +175,23 @@ SDL_AppResult Game::gameInit() {
 SDL_AppResult Game::gameIterate() {
    // Update deltaTime
    Uint64 currentTick = SDL_GetTicks();
-   deltaTime = (currentTick - lastTick) / 1000.0f; 
+   deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
 
    // Clear screen
 
    // This is gross I just wanted to see what it looked like
    const SDL_Color SAGE_GREEN = { 178, 172, 136, 255 };
-   SDL_SetRenderDrawColor(renderer, SAGE_GREEN.r, SAGE_GREEN.g, SAGE_GREEN.b, SAGE_GREEN.a); 
+   SDL_SetRenderDrawColor(renderer, SAGE_GREEN.r, SAGE_GREEN.g, SAGE_GREEN.b, SAGE_GREEN.a);
    SDL_RenderClear(renderer);
 
-   // Render Text
-   if (textManager) {
-      textManager->display(renderer, "This game is a work in progress.");
-   }
+
 
    if (player) {
       SDL_FRect playerRect = { player->getPosition().getX(), player->getPosition().getY(), 50, 50 };
-      //DEBUG
+      ////DEBUG
       //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); 
+
       SDL_RenderFillRect(renderer, &playerRect);
       if (playerTexture) {
          if (!SDL_RenderTexture(renderer, playerTexture, nullptr, &playerRect)) {
@@ -190,28 +200,42 @@ SDL_AppResult Game::gameIterate() {
       }
    }
 
+   if (enemy) {
+      SDL_FRect enemyRect = { enemy->getPosition().getX(), enemy->getPosition().getY(), 50, 50 };
+      ////DEBUG
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+
+      SDL_RenderFillRect(renderer, &enemyRect);
+
+   }
+
+   // Render collision text if flag is set
+   if (showCollisionText) {
+      textManager->display(renderer);
+   }
+
    SDL_RenderPresent(renderer);
    return SDL_APP_SUCCESS;
 }
 
 void Game::updateCamera(Position& target) {
-    // Center the camera on the target (player)
-    camera.setX(target.getX() - WINDOW_WIDTH / 2.0f);
-    camera.setY(target.getY() - WINDOW_HEIGHT / 2.0f);
+   // Center the camera on the target (player)
+   camera.setX(target.getX() - WINDOW_WIDTH / 2.0f);
+   camera.setY(target.getY() - WINDOW_HEIGHT / 2.0f);
 
-    // Optional: Clamp the camera to the game world boundaries
-    if (camera.getX() < 0) {
-        camera.setX(0);
-    }
-    if (camera.getY() < 0) {
-        camera.setY(0);
-    }
-    if (camera.getX() > WORLD_WIDTH - WINDOW_WIDTH) {
-        camera.setX(WORLD_WIDTH - WINDOW_WIDTH);
-    }
-    if (camera.getY() > WORLD_HEIGHT - WINDOW_HEIGHT) {
-        camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
-    }
+   // Optional: Clamp the camera to the game world boundaries
+   if (camera.getX() < 0) {
+      camera.setX(0);
+   }
+   if (camera.getY() < 0) {
+      camera.setY(0);
+   }
+   if (camera.getX() > WORLD_WIDTH - WINDOW_WIDTH) {
+      camera.setX(WORLD_WIDTH - WINDOW_WIDTH);
+   }
+   if (camera.getY() > WORLD_HEIGHT - WINDOW_HEIGHT) {
+      camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
+   }
 }
 /*
 void Game::renderSprite(SpriteSheet sprite, SDL_FRect rect) {

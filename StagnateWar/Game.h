@@ -22,6 +22,8 @@ private:
    // TODO: Temp will be moved later
    SDL_Texture* playerTexture = nullptr;
    PartyMember* player = nullptr;
+   PartyMember* enemy = nullptr;
+   bool showCollisionText = false; // New flag for collision text
 
    bool isEditorMode = false;
    float deltaTime = 0.0f;
