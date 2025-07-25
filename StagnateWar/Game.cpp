@@ -95,6 +95,7 @@ void Game::handleEvent(SDL_Event& event) {
 }
 
 SDL_AppResult Game::gameInit() {
+   
    SDL_SetAppMetadata("Stagnate War", "1.0", "Stagnate War");
 
    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -135,8 +136,17 @@ SDL_AppResult Game::gameInit() {
       return SDL_APP_FAILURE;
    }
 
+
+   SDL_Surface* icon = IMG_Load("assets/testIcon.png");
+   if (!SDL_SetWindowIcon(window, icon)) {
+      SDL_Log("Failed to set window Icon: %s", SDL_GetError());
+   }
+   
+   
    //TODO auto add members from a array probably based on levelManager
 
+
+   // TextureLoader
    const char* path = "assets/testGuy.png";
    playerTexture = IMG_LoadTexture(renderer, path);
    if (!playerTexture) {

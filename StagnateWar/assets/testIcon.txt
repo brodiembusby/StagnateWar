@@ -1,0 +1,1 @@
+Make the image 32x32 and it should work. Other size will create weird discrepancies.
