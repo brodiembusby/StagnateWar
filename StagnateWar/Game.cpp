@@ -148,6 +148,14 @@ void Game::handleEvent(SDL_Event& event) {
          isEditorMode = true;
          SDL_Log("Entering Editor Mode");
          break;
+      case SDL_SCANCODE_F11: // Toggle fullscreen with F11
+         if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+            SDL_SetWindowFullscreen(window, 0); // Exit fullscreen
+         }
+         else {
+            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); // Enter fullscreen
+         }
+         break;
       default:
          break;
       }
@@ -165,7 +173,6 @@ void Game::handleEvent(SDL_Event& event) {
 }
 
 SDL_AppResult Game::gameIterate() {
-   // I dont think this works
    Uint64 currentTick = SDL_GetTicks();
    deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
@@ -176,99 +183,39 @@ SDL_AppResult Game::gameIterate() {
 
    Entity* player = entityManager.getEntity("player");
    Entity* enemy = entityManager.getEntity("enemy");
-   SDL_Texture* playerTexture = textureManager.getTexture("ArmySpriteSheet");
 
    if (player) {
-      SDL_FRect playerRect = { player->getPosition().getX(), player->getPosition().getY(), 32, 32 };
-      ////DEBUG
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); 
-
-      SDL_RenderFillRect(renderer, &playerRect);
-      if (playerTexture) {
-         if (!SDL_RenderTexture(renderer, playerTexture, nullptr, &playerRect)) {
-            SDL_Log("Couldn't render texture: %s", SDL_GetError());
-         }
+      SpriteSheet* playerSpriteSheet = player->getSpriteSheet();
+      if (playerSpriteSheet) {
+         SDL_FRect destRect = player->getRect();
+         playerSpriteSheet->drawSprite(renderer, destRect);
       }
-   }else{
-      SDL_Log("Player entity not found");
+      else {
+         SDL_Log("Player has no sprite sheet");
+      }
    }
-
    if (enemy) {
-      SDL_FRect enemyRect = { enemy->getPosition().getX(), enemy->getPosition().getY(), 32, 32 };
-      ////DEBUG
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-      SDL_RenderFillRect(renderer, &enemyRect);
-
+      SpriteSheet* enemySpriteSheet = enemy->getSpriteSheet();
+      if (enemySpriteSheet) {
+         SDL_FRect destRect = enemy->getRect();
+         enemySpriteSheet->drawSprite(renderer, destRect);
+      }
+      else {
+         SDL_Log("Enemy has no sprite sheet");
+      }
    }
-
-   // Render collision text if flag is set
    if (showCollisionText) {
       textManager->display(renderer);
    }
-
    SDL_RenderPresent(renderer);
    return SDL_APP_SUCCESS;
 }
 
 void Game::updateCamera(Position& target) {
-   // Center the camera on the target (player)
    camera.setX(target.getX() - WINDOW_WIDTH / 2.0f);
    camera.setY(target.getY() - WINDOW_HEIGHT / 2.0f);
-
-   // Optional: Clamp the camera to the game world boundaries
-   if (camera.getX() < 0) {
-      camera.setX(0);
-   }
-   if (camera.getY() < 0) {
-      camera.setY(0);
-   }
-   if (camera.getX() > WORLD_WIDTH - WINDOW_WIDTH) {
-      camera.setX(WORLD_WIDTH - WINDOW_WIDTH);
-   }
-   if (camera.getY() > WORLD_HEIGHT - WINDOW_HEIGHT) {
-      camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
-   }
+   if (camera.getX() < 0) camera.setX(0);
+   if (camera.getY() < 0) camera.setY(0);
+   if (camera.getX() > WORLD_WIDTH - WINDOW_WIDTH) camera.setX(WORLD_WIDTH - WINDOW_WIDTH);
+   if (camera.getY() > WORLD_HEIGHT - WINDOW_HEIGHT) camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
 }
-/*
-void Game::renderSprite(SpriteSheet sprite, SDL_FRect rect) {
-    SDL_SetRenderDrawColor(renderer, 100, 0, 0, 255); // Rect colors
-    // Adjust the rectangle's position relative to the camera
-    SDL_FRect adjustedRect = {
-        rect.x - camera.getX(),
-        rect.y - camera.getY(),
-        rect.w,
-        rect.h
-    };
-    SDL_RenderRect(renderer, &adjustedRect);
-}
-
-void Game::render() {
-    updateCamera(player->getPosition());
-    //level.render(sdl);
-    for (Entity* obj : objects) {
-        renderSprite(obj->getSprite(), obj->getRect());
-    }
-    if (isEditorMode) {
-        editor.renderGrid(sdl);
-    }
-}
-
-if (isEditorMode) {
-    // In editor mode, pass events to the editor
-    //editor.updateTile(event);
-    if (event.type == SDL_EVENT_KEY_DOWN) {
-        if (event.key.scancode == SDL_SCANCODE_E) {
-            isEditorMode = false;
-            SDL_Log("Exiting Editor");
-        }
-    }
-}
-
-for (const Tile* tile : level.getTiles()) {
-    if (!tile->getIsWalkable()) {
-        if (player->hasCollided(&tile->getRect()))
-            player->setPosition(player->getPosition().getX() - (playerRect.x - tileRect.x),
-                                player->getPosition().getY() - (playerRect.y - tileRect.y));
-    }
-}
-*/

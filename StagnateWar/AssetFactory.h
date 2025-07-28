@@ -53,6 +53,8 @@ struct EntityData {
     std::string type;
     Position position;
     std::string textureName;
+    int rows;
+    int columns;
 };
 
 /// <summary>
@@ -66,12 +68,9 @@ private:
    TextureManager& textureManager;
    EntityManager& entityManager;
    SDL_Renderer* renderer;
+   int spriteSheetRC = 9;
   
-   
-   // Configuration for entities
    std::unordered_map<std::string, EntityData> entities;
-
-   // Texture paths
    std::unordered_map<std::string, std::string> texturePaths = {
        {"ArmySpriteSheet", "assets/ArmySpriteSheet.jpg"},
        {"TileSpriteSheet", "assets/TileSpriteSheet.jpg"},
@@ -83,12 +82,12 @@ public:
    
    AssetFactory(TextureManager& tm, EntityManager& em, SDL_Renderer* r)
       : textureManager(tm), entityManager(em), renderer(r),
-        entities{
-            {"player", {"player", Position(100.0f, 100.0f), "ArmySpriteSheet"}},
-            {"enemy", {"enemy", Position(200.0f, 200.0f), "ArmySpriteSheet"}}
-        }
-   {
+      entities{
+          {"player", {"player", Position(100.0f, 100.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}},
+          {"enemy", {"enemy", Position(200.0f, 200.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}}
+      } {
    }
+
 
    SDL_Texture* loadTexture(const std::string& name);
    Entity* createEntity(const std::string& name);

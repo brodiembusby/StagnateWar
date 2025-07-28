@@ -1,4 +1,5 @@
 #include "AssetFactory.h"
+
 Entity* AssetFactory::createEntity(const std::string& name) {
    auto it = entities.find(name);
    if (it == entities.end()) {
@@ -11,7 +12,7 @@ Entity* AssetFactory::createEntity(const std::string& name) {
       entity = new PartyMember();
    }
    else if (data.type == "enemy") {
-      entity = new PartyMember(); // Or use a different class if needed
+      entity = new PartyMember();
    }
    else {
       SDL_Log("Unknown entity type: %s", data.type.c_str());
@@ -21,7 +22,9 @@ Entity* AssetFactory::createEntity(const std::string& name) {
       entity->setPosition(data.position.getX(), data.position.getY());
       SDL_Texture* texture = loadTexture(data.textureName);
       if (texture) {
-         entity->setTexture(texture); // Assuming Entity has setTexture
+         SpriteSheet* spriteSheet = new SpriteSheet(texture, data.rows, data.columns);
+         entity->setSpriteSheet(spriteSheet);
+         entity->setSize(spriteSheet->getClip().w, spriteSheet->getClip().h);
       }
       else {
          SDL_Log("Failed to load texture for entity %s", name.c_str());
@@ -34,15 +37,12 @@ Entity* AssetFactory::createEntity(const std::string& name) {
    return nullptr;
 }
 
-
 SDL_Texture* AssetFactory::loadTexture(const std::string& name) {
    auto it = texturePaths.find(name);
    if (it == texturePaths.end()) {
       SDL_Log("Texture %s not found in texturePaths", name.c_str());
       return nullptr;
    }
-
-   // Check if texture is already loaded
    SDL_Texture* texture = textureManager.getTexture(name);
    if (!texture) {
       texture = IMG_LoadTexture(renderer, it->second.c_str());
