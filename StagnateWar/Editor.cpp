@@ -1,5 +1,5 @@
 //#include "Editor.h"
-//
+// THIS WORKS
 //void Editor::renderGrid(Game& sdl) {
 //   // Render grid first 2000 / 50 = 40  (40,40)
 //   SDL_SetRenderDrawColor(sdl.getRenderer(), 255, 255, 255, 255); // Gray grid lines
@@ -16,7 +16,7 @@
 //   }
 //
 //}
-//
+// THIS DOESNT WORK
 //void Editor::updateTile(SDL_Event& event) {
 //   //if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
 //   //   // Get mouse position

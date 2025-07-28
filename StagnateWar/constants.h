@@ -8,7 +8,7 @@ const float WINDOW_HEIGHT = 480.0f;
 const float WORLD_WIDTH = 1280.0f;
 const float WORLD_HEIGHT = 960.0f;
 
-const float DEFAULT_WIDTH = 66.0f;
-const float DEFAULT_HEIGHT = 56.0f;
+const float DEFAULT_WIDTH = 32.0f;
+const float DEFAULT_HEIGHT = 32.0f;
 
 #endif

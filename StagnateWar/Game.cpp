@@ -1,12 +1,15 @@
 #include "Game.h"
 #include "TextManager.h"
-Game::Game() : player(nullptr), textManager(nullptr) {
-}
+
+Game::Game() {}
 
 Game::~Game() {
    gameQuit();
 }
-
+/// <summary>
+/// Runs the main game loop, handling initialization, events, iteration, and cleanup.
+/// </summary>
+/// <returns>Returns SDL_APP_SUCCESS if the game loop completes successfully, or SDL_APP_FAILURE if initialization fails.</returns>
 SDL_AppResult Game::Run() {
 
    if (gameInit() != SDL_APP_SUCCESS) {
@@ -33,22 +36,14 @@ SDL_AppResult Game::Run() {
    gameQuit();
    return SDL_APP_SUCCESS;
 }
-
+/// <summary>
+/// Handles the cleanup of the game resources.
+/// </summary>
 void Game::gameQuit() {
 
-   //TODO change to array of entityies and auto delete
-   if (playerTexture) {
-      SDL_DestroyTexture(playerTexture);
-      playerTexture = nullptr;
-   }
-   if (textManager) {
-      delete textManager;
-      textManager = nullptr;
-   }
-   if (player) {
-      delete player;
-      player = nullptr;
-   }
+   delete assetFactory;
+   delete textManager;
+
    if (renderer) {
       SDL_DestroyRenderer(renderer);
       renderer = nullptr;
@@ -65,42 +60,10 @@ void Game::gameQuit() {
    SDL_Quit();
 }
 
-void Game::handleEvent(SDL_Event& event) {
-   float speed = 200.0f; // Pixels per second
-   float deltaTime = getDeltaTime();
-   if (event.type == SDL_EVENT_KEY_DOWN) {
-      switch (event.key.scancode) {
-      case SDL_SCANCODE_W:
-         player->setPosition(player->getPosition().getX(), player->getPosition().getY() - 10);
-         break;
-      case SDL_SCANCODE_S:
-         player->setPosition(player->getPosition().getX(), player->getPosition().getY() + 10);
-         break;
-      case SDL_SCANCODE_A:
-         player->setPosition(player->getPosition().getX() - 10, player->getPosition().getY());
-         break;
-      case SDL_SCANCODE_D:
-         player->setPosition(player->getPosition().getX() + 10, player->getPosition().getY());
-         break;
-      case SDL_SCANCODE_E:
-         isEditorMode = true;
-         SDL_Log("Entering Editor Mode");
-         break;
-      default:
-         break;
-      }
-   }
-   if (player->hasCollided(*enemy)) {
-
-      showCollisionText = true;
-      const char* testText = "This game is a work in progress.";
-      textManager->setText(testText);
-   }
-   else if(!player->hasCollided(*enemy)) {
-      showCollisionText = false;
-   }
-}
-
+/// <summary>
+/// Initializes the game application, including SDL, window, renderer, font, and core game assets.
+/// </summary>
+/// <returns>Returns SDL_APP_SUCCESS if initialization is successful; otherwise, returns SDL_APP_FAILURE if any step fails.</returns>
 SDL_AppResult Game::gameInit() {
 
    SDL_SetAppMetadata("Stagnate War", "1.0", "Stagnate War");
@@ -148,49 +111,77 @@ SDL_AppResult Game::gameInit() {
    if (!SDL_SetWindowIcon(window, icon)) {
       SDL_Log("Failed to set window Icon: %s", SDL_GetError());
    }
+   // Someone said this gets rid of the memory leak IDK
+   SDL_DestroySurface(icon);
 
+   assetFactory = new AssetFactory(textureManager, entityManager, renderer);
 
-   //TODO auto add members from a array probably based on levelManager
-
-
-   // TextureLoader
-   const char* path = "assets/testGuy.png";
-   playerTexture = IMG_LoadTexture(renderer, path);
-   if (!playerTexture) {
-      SDL_Log("Couldn't load texture %s: %s", path, SDL_GetError());
-      return SDL_APP_FAILURE;
-   }
-
-   player = new PartyMember();
-   player->setPosition(100, 100); // Set initial position
-
-   enemy = new PartyMember();
-   enemy->setPosition(200, 200); // Set initial position
+   assetFactory->createEntity("player");
+   assetFactory->createEntity("enemy");
 
    deltaTime = 1.0f / 60.0f;
+   lastTick = SDL_GetTicks();
 
    return SDL_APP_SUCCESS;
 }
 
+void Game::handleEvent(SDL_Event& event) {
+   float speed = 200.0f; // Pixels per second
+   float deltaTime = getDeltaTime();
+   Entity* player = entityManager.getEntity("player");
+
+   if (event.type == SDL_EVENT_KEY_DOWN) {
+      switch (event.key.scancode) {
+      case SDL_SCANCODE_W:
+         player->setPosition(player->getPosition().getX(), player->getPosition().getY() - 10);
+         break;
+      case SDL_SCANCODE_S:
+         player->setPosition(player->getPosition().getX(), player->getPosition().getY() + 10);
+         break;
+      case SDL_SCANCODE_A:
+         player->setPosition(player->getPosition().getX() - 10, player->getPosition().getY());
+         break;
+      case SDL_SCANCODE_D:
+         player->setPosition(player->getPosition().getX() + 10, player->getPosition().getY());
+         break;
+      case SDL_SCANCODE_E:
+         isEditorMode = true;
+         SDL_Log("Entering Editor Mode");
+         break;
+      default:
+         break;
+      }
+   }
+   Entity* enemy = entityManager.getEntity("enemy");
+   if (player->hasCollided(*enemy)) {
+
+      showCollisionText = true;
+      const char* testText = "This game is a work in progress.";
+      textManager->setText(testText);
+   }
+   else if (!player->hasCollided(*enemy)) {
+      showCollisionText = false;
+   }
+}
+
 SDL_AppResult Game::gameIterate() {
-   // Update deltaTime
+   // I dont think this works
    Uint64 currentTick = SDL_GetTicks();
    deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
 
-   // Clear screen
-
-   // This is gross I just wanted to see what it looked like
    const SDL_Color SAGE_GREEN = { 178, 172, 136, 255 };
    SDL_SetRenderDrawColor(renderer, SAGE_GREEN.r, SAGE_GREEN.g, SAGE_GREEN.b, SAGE_GREEN.a);
    SDL_RenderClear(renderer);
 
-
+   Entity* player = entityManager.getEntity("player");
+   Entity* enemy = entityManager.getEntity("enemy");
+   SDL_Texture* playerTexture = textureManager.getTexture("ArmySpriteSheet");
 
    if (player) {
-      SDL_FRect playerRect = { player->getPosition().getX(), player->getPosition().getY(), 50, 50 };
+      SDL_FRect playerRect = { player->getPosition().getX(), player->getPosition().getY(), 32, 32 };
       ////DEBUG
-      //SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); 
+      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); 
 
       SDL_RenderFillRect(renderer, &playerRect);
       if (playerTexture) {
@@ -198,13 +189,14 @@ SDL_AppResult Game::gameIterate() {
             SDL_Log("Couldn't render texture: %s", SDL_GetError());
          }
       }
+   }else{
+      SDL_Log("Player entity not found");
    }
 
    if (enemy) {
-      SDL_FRect enemyRect = { enemy->getPosition().getX(), enemy->getPosition().getY(), 50, 50 };
+      SDL_FRect enemyRect = { enemy->getPosition().getX(), enemy->getPosition().getY(), 32, 32 };
       ////DEBUG
       SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-
       SDL_RenderFillRect(renderer, &enemyRect);
 
    }
