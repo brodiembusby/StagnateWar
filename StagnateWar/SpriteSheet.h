@@ -4,7 +4,8 @@
 #include <vector>
 #include <string>
 
-// Aspect Ration of 4:3
+// Sprite is 32x32 pixels 
+// ODO:
 class SpriteSheet {
 private:
    

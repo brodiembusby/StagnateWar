@@ -26,7 +26,3 @@
 //   SDL_BlitSurface(image, &mClip, windowSurface, rect);
 //
 //}
-#include "SpriteSheet.h"
-
-//SpriteSheet::SpriteSheet() : texture(nullptr) {}
-//SpriteSheet::~SpriteSheet() { if (texture) { SDL_DestroyTexture(texture); texture = nullptr; } }

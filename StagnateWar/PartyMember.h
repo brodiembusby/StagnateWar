@@ -1,7 +1,9 @@
 #pragma once
 #include "Entity.h"
 #include <string>
-
+/// <summary>
+/// Defines the different types of items.
+/// </summary>
 enum ItemType
 {
    WEAPON,
@@ -11,7 +13,9 @@ enum ItemType
 
 };
 
-
+/// <summary>
+/// Wrapper class for an item in the game.
+/// </summary>
 class Item {
 
 private:
@@ -32,54 +36,45 @@ public:
    void setValue(int value) { this->value = value; }
 };
 
+/// <summary>
+/// Represents an inventory containing up to 10 items.
+/// </summary>
 
-//class Inventory {
-//
-//private:
-//   std::array<Item, 10> inventory;
-//   
-//public:
-//
-//
-//
-//};
-class PartyMember : public Entity
-{
+struct Inventory {
+
+   Item inventory[10]; ;
+   
+};
+
+/// <summary>
+/// A class representing a party member in the game. A party entity is a type of 
+/// entity that has an item and stats.
+/// </summary>
+class PartyMember : public Entity {
 private:
    Item item;
-   //Inventory inventory;
    int health = 100;
    int level = 1;
    int xp = 0;
    int strength = 1;
    int speed = 1;
    int armour = 1;
-   // StatusEffect effects[];
 
 public:
-
    PartyMember() = default;
 
-   void setItem(Item item) { item = item;}
+   void setItem(Item item) { this->item = item; }
    void setXP(int xp) { this->xp = xp; }
    void setStrength(int strength) { this->strength = strength; }
    void setSpeed(int speed) { this->speed = speed; }
    void setArmour(int armour) { this->armour = armour; }
-   void setPartyMemberLevel(int level) { this->level = level;}
+   void setPartyMemberLevel(int level) { this->level = level; }
 
-   Item getItem() { item = item; }
-   int getXP() { return xp; }
-   int getStrength() { return strength; }
-   int getSpeed() { return speed; }
-   int getArmour() { return armour; }
-   int getPartyMemberLevel() { return level; }
+   Item getItem() const { return item; } 
+   int getXP() const { return xp; } 
+   int getStrength() const { return strength; } 
+   int getSpeed() const { return speed; } 
+   int getArmour() const { return armour; } 
+   int getPartyMemberLevel() const { return level; } 
 
-   void update(); // Placeholder
-
-   // void applyStatusEffect(StatusEffect status) {effects.push_back(status);}
 };
-
-//// Placeholder implementation for removeItem (to avoid linker errors)
-//void Inventory::removeItem(Item item) {
-//   // TODO: Implement removal logic
-//}
