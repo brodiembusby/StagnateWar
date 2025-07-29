@@ -144,45 +144,61 @@ void Game::handleEvent(SDL_Event& event) {
    std::tuple<int, int> winSize = getWindowSize();
    windowWidth = std::get<0>(winSize);
    windowHeight = std::get<1>(winSize);
-  
-   
-   float scaleFactor = windowHeight / 480.0f; 
+
+   float scaleFactor = windowHeight / 480.0f;
    float speed = 200.0f * scaleFactor;
    float deltaTime = getDeltaTime();
    Entity* player = entityManager.getEntity("player");
 
+   // Define world boundaries (must match updateCamera)
+   const float worldWidth = 3072.0f;
+   const float worldHeight = 3072.0f;
+
    if (event.type == SDL_EVENT_KEY_DOWN) {
-      switch (event.key.scancode) {
-      case SDL_SCANCODE_W:
-         player->setPosition(player->getPosition().getX(), player->getPosition().getY() - 10 * scaleFactor);
-         break;
-      case SDL_SCANCODE_S:
-         player->setPosition(player->getPosition().getX(), player->getPosition().getY() + 10 * scaleFactor);
-         break;
-      case SDL_SCANCODE_A:
-         player->setPosition(player->getPosition().getX() - 10 * scaleFactor, player->getPosition().getY());
-         break;
-      case SDL_SCANCODE_D:
-         player->setPosition(player->getPosition().getX() + 10 * scaleFactor, player->getPosition().getY());
-         break;
-      case SDL_SCANCODE_E:
-         isEditorMode = true;
-         SDL_Log("Entering Editor Mode");
-         break;
-      case SDL_SCANCODE_F11: // Toggle fullscreen with F11
-         if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
-            SDL_SetWindowFullscreen(window, 0); // Exit fullscreen
+      if (player) {
+         float newX = player->getPosition().getX();
+         float newY = player->getPosition().getY();
+         float playerWidth = player->getRect().w;
+         float playerHeight = player->getRect().h;
+
+         switch (event.key.scancode) {
+         case SDL_SCANCODE_W:
+            newY -= 10 * scaleFactor;
+            break;
+         case SDL_SCANCODE_S:
+            newY += 10 * scaleFactor;
+            break;
+         case SDL_SCANCODE_A:
+            newX -= 10 * scaleFactor;
+            break;
+         case SDL_SCANCODE_D:
+            newX += 10 * scaleFactor;
+            break;
+         case SDL_SCANCODE_E:
+            isEditorMode = true;
+            SDL_Log("Entering Editor Mode");
+            break;
+         case SDL_SCANCODE_F11: // Toggle fullscreen with F11
+            if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+               SDL_SetWindowFullscreen(window, 0); // Exit fullscreen
+            }
+            else {
+               SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); // Enter fullscreen
+            }
+            break;
+         default:
+            break;
          }
-         else {
-            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); // Enter fullscreen
-         }
-         break;
-      default:
-         break;
+
+         // Clamp player position to world boundaries, accounting for player size
+         newX = std::max(0.0f, std::min(newX, worldWidth - playerWidth));
+         newY = std::max(0.0f, std::min(newY, worldHeight - playerHeight));
+
+         // Set the clamped position
+         player->setPosition(newX, newY);
       }
    }
    else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-
       // Update entity sizes
       Entity* player = entityManager.getEntity("player");
       Entity* enemy = entityManager.getEntity("enemy");
@@ -214,27 +230,39 @@ SDL_AppResult Game::gameIterate() {
    windowWidth = std::get<0>(winSize);
    windowHeight = std::get<1>(winSize);
 
+   // Update camera to follow the player
+   Entity* player = entityManager.getEntity("player");
+   if (player) {
+      updateCamera(player->getPosition());
+   }
+
    const SDL_Color SAGE_GREEN = { 178, 172, 136, 255 };
    SDL_SetRenderDrawColor(renderer, SAGE_GREEN.r, SAGE_GREEN.g, SAGE_GREEN.b, SAGE_GREEN.a);
    SDL_RenderClear(renderer);
 
-   Entity* player = entityManager.getEntity("player");
    Entity* enemy = entityManager.getEntity("enemy");
 
+   // This might stay
    if (player) {
       SpriteSheet* playerSpriteSheet = player->getSpriteSheet();
       if (playerSpriteSheet) {
          SDL_FRect destRect = player->getRect();
+         // Adjust the destination rectangle to account for camera position
+         destRect.x -= camera.getX();
+         destRect.y -= camera.getY();
          playerSpriteSheet->drawSprite(renderer, destRect);
       }
       else {
          SDL_Log("Player has no sprite sheet");
       }
    }
+   // This will be replaced with a more efficent structure later
    if (enemy) {
       SpriteSheet* enemySpriteSheet = enemy->getSpriteSheet();
       if (enemySpriteSheet) {
          SDL_FRect destRect = enemy->getRect();
+         destRect.x -= camera.getX();
+         destRect.y -= camera.getY();
          enemySpriteSheet->drawSprite(renderer, destRect);
       }
       else {
@@ -253,10 +281,22 @@ SDL_AppResult Game::gameIterate() {
 }
 
 void Game::updateCamera(Position& target) {
-   camera.setX(target.getX() - WINDOW_WIDTH / 2.0f);
-   camera.setY(target.getY() - WINDOW_HEIGHT / 2.0f);
-   if (camera.getX() < 0) camera.setX(0);
-   if (camera.getY() < 0) camera.setY(0);
-   if (camera.getX() > WORLD_WIDTH - WINDOW_WIDTH) camera.setX(WORLD_WIDTH - WINDOW_WIDTH);
-   if (camera.getY() > WORLD_HEIGHT - WINDOW_HEIGHT) camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
+
+   int windowWidth, windowHeight;
+   std::tuple<int, int> winSize = getWindowSize();
+   windowWidth = std::get<0>(winSize);
+   windowHeight = std::get<1>(winSize);
+   
+   // Center the camera on the target (player)
+   float cameraX = target.getX() - windowWidth / 2.0f;
+   float cameraY = target.getY() - windowHeight / 2.0f;
+
+   const float worldWidth = 3072.0f;  // Example world width
+   const float worldHeight = 3072.0f;  // Example world height
+   
+   cameraX = std::max(0.0f, std::min(cameraX, worldWidth - windowWidth));
+   cameraY = std::max(0.0f, std::min(cameraY, worldHeight - windowHeight));
+
+   camera.setX(cameraX);
+   camera.setY(cameraY);
 }
