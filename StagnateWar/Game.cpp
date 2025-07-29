@@ -123,15 +123,15 @@ SDL_AppResult Game::gameInit() {
    Entity* enemy = assetFactory->createEntity("enemy");
 
    // I Dont know if this changes much
-   //if (player && enemy) {
-   //   float scaleFactor = windowHeight / 480.0f; // Scale relative to original 480 height
-   //   float entityWidth = 32.0f * scaleFactor;
-   //   float entityHeight = 32.0f * scaleFactor;
-   //   player->setSize(entityWidth, entityHeight);
-   //   enemy->setSize(entityWidth, entityHeight);
-   //   player->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
-   //   enemy->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
-   //}
+   if (player && enemy) {
+      float scaleFactor = windowHeight / 480.0f; // Scale relative to original 480 height
+      float entityWidth = 32.0f * scaleFactor;
+      float entityHeight = 32.0f * scaleFactor;
+      player->setSize(entityWidth, entityHeight);
+      enemy->setSize(entityWidth, entityHeight);
+      player->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
+      enemy->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
+   }
 
 
    deltaTime = 1.0f / 60.0f;
@@ -150,11 +150,6 @@ void Game::handleEvent(SDL_Event& event) {
    float speed = 200.0f * scaleFactor;
    float deltaTime = getDeltaTime();
    Entity* player = entityManager.getEntity("player");
-
-   // Define world boundaries (must match updateCamera)
-   const float worldWidth = 3072.0f;
-   const float worldHeight = 3072.0f;
-
 
    if (event.type == SDL_EVENT_KEY_DOWN) {
       if (player) {
