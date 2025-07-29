@@ -5,15 +5,21 @@
 
 class TextManager {
 public:
-   TextManager(TTF_Font* font); 
+   TextManager(TTF_Font* font);
    ~TextManager();
 
-   void display(SDL_Renderer* renderer);
+   void display(SDL_Renderer* renderer, int window_width, int window_height);
    void setText(const char* text) { this->text = text; }
    const char* getText() { return text; }
+   //void setFont(TTF_Font* newFont) {
+   //   if (font) {
+   //      TTF_CloseFont(font);
+   //   }
+   //   font = newFont;
+   //}
 
 private:
-   TTF_Font* font; 
+   TTF_Font* font;
    SDL_Texture* textTexture;
    const char* text;
 };

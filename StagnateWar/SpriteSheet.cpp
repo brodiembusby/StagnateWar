@@ -1,28 +1,24 @@
 #include "SpriteSheet.h"
 // https://dev.to/noah11012/using-sdl2-spritesheets-46h5
 
-//SpriteSheet::SpriteSheet(char const* path, int row, int column) {
-//
-//   image = IMG_LoadTexture(sdl.getRender(), path);
-//
-//   mClip.w = image->w / column;
-//   mClip.h = image->h / row;
-//}
-//
-//SpriteSheet::~SpriteSheet()
-//{
-//   SDL_DestroyTexture(image);
-//}
-//
-//void SpriteSheet::selectSprite(int x, int y)
-//{
-//   mClip.x = x * mClip.w;
-//   mClip.y = y * mClip.h;
-//
-//}
+SpriteSheet::SpriteSheet(SDL_Texture* tex, int rows, int columns) : texture(tex) {
+   
+   float texWidth , texHeight ;
+   SDL_GetTextureSize(texture, &texWidth, &texHeight);
+   clip.w = static_cast<float>(texWidth) / columns;
+   clip.h = static_cast<float>(texHeight) / rows;
+   clip.x = 0.0f;
+   clip.y = 0.0f;
+}
 
-//void SpriteSheet::drawSprite(SDL_Texture* windowSurface, SDL_Rect* rect){
-//
-//   SDL_BlitSurface(image, &mClip, windowSurface, rect);
-//
-//}
+void SpriteSheet::selectSprite(int x, int y)
+{
+   clip.x = x * clip.w;
+   clip.y = y * clip.h;
+
+}
+
+void SpriteSheet::drawSprite(SDL_Renderer* renderer, SDL_FRect& rect){
+
+   SDL_RenderTexture(renderer, texture, &clip, &rect);
+}

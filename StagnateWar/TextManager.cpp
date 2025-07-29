@@ -11,9 +11,13 @@ TextManager::~TextManager() {
    // Note: Do not destroy the font here, as it's managed by the Game class
 }
 
-void TextManager::display(SDL_Renderer* renderer) {
+void TextManager::display(SDL_Renderer* renderer, int window_width, int window_height) {
+   
+   float gui_height = window_height / 3.0f;
+   float gui_y = window_height - gui_height;
+
    // Draw GUI backdrop
-   SDL_FRect GUIBackdrop = { 0.0f, 320.0f, WINDOW_WIDTH, WINDOW_HEIGHT / 3.0f };
+   SDL_FRect GUIBackdrop = { 0.0f, gui_y, window_width, gui_height };
    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue backdrop
    SDL_RenderFillRect(renderer, &GUIBackdrop);
 
@@ -26,7 +30,7 @@ void TextManager::display(SDL_Renderer* renderer) {
    SDL_Color textColor = { 255, 255, 255, 255 };
 
    // Render text to a surface using TTF_RenderText_Solid_Wrapped
-   SDL_Surface* textSurface = TTF_RenderText_Solid_Wrapped(font, getText(), 0, textColor, WINDOW_WIDTH - 20);
+   SDL_Surface* textSurface = TTF_RenderText_Solid_Wrapped(font, getText(), 0, textColor, window_width - 20);
    if (!textSurface) {
       SDL_Log("Failed to render text: %s", SDL_GetError());
       return;
@@ -40,8 +44,14 @@ void TextManager::display(SDL_Renderer* renderer) {
       return;
    }
 
-   // Define destination rectangle to fill the backdrop (with padding)
-   SDL_FRect textRect = { 10.0f, 330.0f, WINDOW_WIDTH - 20.0f, (WINDOW_HEIGHT / 3.0f) - 20.0f };
+   // Define destination rectangle for text with padding, anchored relative to GUI backdrop
+   float text_padding = 10.0f; // Padding from edges of the backdrop
+   SDL_FRect textRect = {
+       text_padding,
+       gui_y + text_padding,
+       static_cast<float>(window_width) - 2 * text_padding,
+       gui_height - 2 * text_padding
+   };
 
    // Render the text texture
    if (!SDL_RenderTexture(renderer, textTexture, nullptr, &textRect)) {

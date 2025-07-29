@@ -72,8 +72,9 @@ SDL_AppResult Game::gameInit() {
       SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
       return SDL_APP_FAILURE;
    }
-
-   if (!SDL_CreateWindowAndRenderer("Stagnate War", WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer)) {
+   int defaultWindowWidth = 640;
+   int defaultWindowHeight = 480;
+   if (!SDL_CreateWindowAndRenderer("Stagnate War", defaultWindowWidth, defaultWindowHeight, SDL_WINDOW_RESIZABLE, &window, &renderer)) {
       SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
       SDL_Quit();
       return SDL_APP_FAILURE;
@@ -85,14 +86,15 @@ SDL_AppResult Game::gameInit() {
       return SDL_APP_FAILURE;
 
    }
-   /*
-   Fonts I think look good
-   "assets/BitcountPropSingle_Cursive-ExtraBold.ttf"
-   "assets/BitcountPropSingle_Cursive-Regular"
-   "assets/BitcountPropSingle-SemiBold"
-   */
+
+   int windowWidth, windowHeight;
+   std::tuple<int, int> winSize = getWindowSize();
+   windowWidth = std::get<0>(winSize);
+   windowHeight = std::get<1>(winSize);
+   float fontSize = windowHeight * 0.15f;
+   fontSize = std::max(12.0f, std::min(fontSize, 58.0f));
    const char* file = "assets/CourierPrime-Regular.ttf";
-   float fontSize = 24;
+
    font = TTF_OpenFont(file, fontSize);
    if (!font) {
       SDL_Log("Couldnt open TTF font file: %s", SDL_GetError());
@@ -116,8 +118,20 @@ SDL_AppResult Game::gameInit() {
 
    assetFactory = new AssetFactory(textureManager, entityManager, renderer);
 
-   assetFactory->createEntity("player");
-   assetFactory->createEntity("enemy");
+   Entity* player = assetFactory->createEntity("player");
+   Entity* enemy = assetFactory->createEntity("enemy");
+
+   // I Dont know if this changes much
+   //if (player && enemy) {
+   //   float scaleFactor = windowHeight / 480.0f; // Scale relative to original 480 height
+   //   float entityWidth = 32.0f * scaleFactor;
+   //   float entityHeight = 32.0f * scaleFactor;
+   //   player->setSize(entityWidth, entityHeight);
+   //   enemy->setSize(entityWidth, entityHeight);
+   //   player->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
+   //   enemy->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
+   //}
+
 
    deltaTime = 1.0f / 60.0f;
    lastTick = SDL_GetTicks();
@@ -126,49 +140,79 @@ SDL_AppResult Game::gameInit() {
 }
 
 void Game::handleEvent(SDL_Event& event) {
-   float speed = 200.0f; // Pixels per second
+   int windowWidth, windowHeight;
+   std::tuple<int, int> winSize = getWindowSize();
+   windowWidth = std::get<0>(winSize);
+   windowHeight = std::get<1>(winSize);
+  
+   
+   float scaleFactor = windowHeight / 480.0f; 
+   float speed = 200.0f * scaleFactor;
    float deltaTime = getDeltaTime();
    Entity* player = entityManager.getEntity("player");
 
    if (event.type == SDL_EVENT_KEY_DOWN) {
       switch (event.key.scancode) {
       case SDL_SCANCODE_W:
-         player->setPosition(player->getPosition().getX(), player->getPosition().getY() - 10);
+         player->setPosition(player->getPosition().getX(), player->getPosition().getY() - 10 * scaleFactor);
          break;
       case SDL_SCANCODE_S:
-         player->setPosition(player->getPosition().getX(), player->getPosition().getY() + 10);
+         player->setPosition(player->getPosition().getX(), player->getPosition().getY() + 10 * scaleFactor);
          break;
       case SDL_SCANCODE_A:
-         player->setPosition(player->getPosition().getX() - 10, player->getPosition().getY());
+         player->setPosition(player->getPosition().getX() - 10 * scaleFactor, player->getPosition().getY());
          break;
       case SDL_SCANCODE_D:
-         player->setPosition(player->getPosition().getX() + 10, player->getPosition().getY());
+         player->setPosition(player->getPosition().getX() + 10 * scaleFactor, player->getPosition().getY());
          break;
       case SDL_SCANCODE_E:
          isEditorMode = true;
          SDL_Log("Entering Editor Mode");
          break;
+      case SDL_SCANCODE_F11: // Toggle fullscreen with F11
+         if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+            SDL_SetWindowFullscreen(window, 0); // Exit fullscreen
+         }
+         else {
+            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN); // Enter fullscreen
+         }
+         break;
       default:
          break;
       }
    }
-   Entity* enemy = entityManager.getEntity("enemy");
-   if (player->hasCollided(*enemy)) {
+   else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
 
-      showCollisionText = true;
-      const char* testText = "This game is a work in progress.";
-      textManager->setText(testText);
+      // Update entity sizes
+      Entity* player = entityManager.getEntity("player");
+      Entity* enemy = entityManager.getEntity("enemy");
+      if (player && enemy) {
+         float entityWidth = 32.0f * scaleFactor;
+         float entityHeight = 32.0f * scaleFactor;
+         player->setSize(entityWidth, entityHeight);
+         enemy->setSize(entityWidth, entityHeight);
+      }
    }
-   else if (!player->hasCollided(*enemy)) {
+
+   Entity* enemy = entityManager.getEntity("enemy");
+   if (player && enemy && player->hasCollided(*enemy)) {
+      showCollisionText = true;
+   }
+   else {
       showCollisionText = false;
    }
 }
 
+
 SDL_AppResult Game::gameIterate() {
-   // I dont think this works
    Uint64 currentTick = SDL_GetTicks();
    deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
+
+   int windowWidth, windowHeight;
+   std::tuple<int, int> winSize = getWindowSize();
+   windowWidth = std::get<0>(winSize);
+   windowHeight = std::get<1>(winSize);
 
    const SDL_Color SAGE_GREEN = { 178, 172, 136, 255 };
    SDL_SetRenderDrawColor(renderer, SAGE_GREEN.r, SAGE_GREEN.g, SAGE_GREEN.b, SAGE_GREEN.a);
@@ -176,34 +220,32 @@ SDL_AppResult Game::gameIterate() {
 
    Entity* player = entityManager.getEntity("player");
    Entity* enemy = entityManager.getEntity("enemy");
-   SDL_Texture* playerTexture = textureManager.getTexture("ArmySpriteSheet");
 
    if (player) {
-      SDL_FRect playerRect = { player->getPosition().getX(), player->getPosition().getY(), 32, 32 };
-      ////DEBUG
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0); 
-
-      SDL_RenderFillRect(renderer, &playerRect);
-      if (playerTexture) {
-         if (!SDL_RenderTexture(renderer, playerTexture, nullptr, &playerRect)) {
-            SDL_Log("Couldn't render texture: %s", SDL_GetError());
-         }
+      SpriteSheet* playerSpriteSheet = player->getSpriteSheet();
+      if (playerSpriteSheet) {
+         SDL_FRect destRect = player->getRect();
+         playerSpriteSheet->drawSprite(renderer, destRect);
       }
-   }else{
-      SDL_Log("Player entity not found");
+      else {
+         SDL_Log("Player has no sprite sheet");
+      }
    }
-
    if (enemy) {
-      SDL_FRect enemyRect = { enemy->getPosition().getX(), enemy->getPosition().getY(), 32, 32 };
-      ////DEBUG
-      SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-      SDL_RenderFillRect(renderer, &enemyRect);
-
+      SpriteSheet* enemySpriteSheet = enemy->getSpriteSheet();
+      if (enemySpriteSheet) {
+         SDL_FRect destRect = enemy->getRect();
+         enemySpriteSheet->drawSprite(renderer, destRect);
+      }
+      else {
+         SDL_Log("Enemy has no sprite sheet");
+      }
    }
-
-   // Render collision text if flag is set
    if (showCollisionText) {
-      textManager->display(renderer);
+      const char* testText = "This game is a work in progress. PLease be patient with me.";
+      textManager->setText(testText);
+
+      textManager->display(renderer, windowWidth, windowHeight);
    }
 
    SDL_RenderPresent(renderer);
@@ -211,64 +253,10 @@ SDL_AppResult Game::gameIterate() {
 }
 
 void Game::updateCamera(Position& target) {
-   // Center the camera on the target (player)
    camera.setX(target.getX() - WINDOW_WIDTH / 2.0f);
    camera.setY(target.getY() - WINDOW_HEIGHT / 2.0f);
-
-   // Optional: Clamp the camera to the game world boundaries
-   if (camera.getX() < 0) {
-      camera.setX(0);
-   }
-   if (camera.getY() < 0) {
-      camera.setY(0);
-   }
-   if (camera.getX() > WORLD_WIDTH - WINDOW_WIDTH) {
-      camera.setX(WORLD_WIDTH - WINDOW_WIDTH);
-   }
-   if (camera.getY() > WORLD_HEIGHT - WINDOW_HEIGHT) {
-      camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
-   }
+   if (camera.getX() < 0) camera.setX(0);
+   if (camera.getY() < 0) camera.setY(0);
+   if (camera.getX() > WORLD_WIDTH - WINDOW_WIDTH) camera.setX(WORLD_WIDTH - WINDOW_WIDTH);
+   if (camera.getY() > WORLD_HEIGHT - WINDOW_HEIGHT) camera.setY(WORLD_HEIGHT - WINDOW_HEIGHT);
 }
-/*
-void Game::renderSprite(SpriteSheet sprite, SDL_FRect rect) {
-    SDL_SetRenderDrawColor(renderer, 100, 0, 0, 255); // Rect colors
-    // Adjust the rectangle's position relative to the camera
-    SDL_FRect adjustedRect = {
-        rect.x - camera.getX(),
-        rect.y - camera.getY(),
-        rect.w,
-        rect.h
-    };
-    SDL_RenderRect(renderer, &adjustedRect);
-}
-
-void Game::render() {
-    updateCamera(player->getPosition());
-    //level.render(sdl);
-    for (Entity* obj : objects) {
-        renderSprite(obj->getSprite(), obj->getRect());
-    }
-    if (isEditorMode) {
-        editor.renderGrid(sdl);
-    }
-}
-
-if (isEditorMode) {
-    // In editor mode, pass events to the editor
-    //editor.updateTile(event);
-    if (event.type == SDL_EVENT_KEY_DOWN) {
-        if (event.key.scancode == SDL_SCANCODE_E) {
-            isEditorMode = false;
-            SDL_Log("Exiting Editor");
-        }
-    }
-}
-
-for (const Tile* tile : level.getTiles()) {
-    if (!tile->getIsWalkable()) {
-        if (player->hasCollided(&tile->getRect()))
-            player->setPosition(player->getPosition().getX() - (playerRect.x - tileRect.x),
-                                player->getPosition().getY() - (playerRect.y - tileRect.y));
-    }
-}
-*/
