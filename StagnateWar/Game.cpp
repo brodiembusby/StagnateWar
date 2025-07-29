@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "TextManager.h"
-
+#define WORLD_WIDTH 2048.0f
+#define WORLD_HEIGHT 2048.0f
 Game::Game() {}
 
 Game::~Game() {
@@ -154,6 +155,7 @@ void Game::handleEvent(SDL_Event& event) {
    const float worldWidth = 3072.0f;
    const float worldHeight = 3072.0f;
 
+
    if (event.type == SDL_EVENT_KEY_DOWN) {
       if (player) {
          float newX = player->getPosition().getX();
@@ -191,8 +193,8 @@ void Game::handleEvent(SDL_Event& event) {
          }
 
          // Clamp player position to world boundaries, accounting for player size
-         newX = std::max(0.0f, std::min(newX, worldWidth - playerWidth));
-         newY = std::max(0.0f, std::min(newY, worldHeight - playerHeight));
+         newX = std::max(0.0f, std::min(newX, WORLD_WIDTH - playerWidth));
+         newY = std::max(0.0f, std::min(newY, WORLD_HEIGHT - playerHeight));
 
          // Set the clamped position
          player->setPosition(newX, newY);
@@ -291,11 +293,8 @@ void Game::updateCamera(Position& target) {
    float cameraX = target.getX() - windowWidth / 2.0f;
    float cameraY = target.getY() - windowHeight / 2.0f;
 
-   const float worldWidth = 3072.0f;  // Example world width
-   const float worldHeight = 3072.0f;  // Example world height
-   
-   cameraX = std::max(0.0f, std::min(cameraX, worldWidth - windowWidth));
-   cameraY = std::max(0.0f, std::min(cameraY, worldHeight - windowHeight));
+   cameraX = std::max(0.0f, std::min(cameraX, WORLD_WIDTH - windowWidth));
+   cameraY = std::max(0.0f, std::min(cameraY, WORLD_HEIGHT - windowHeight));
 
    camera.setX(cameraX);
    camera.setY(cameraY);
