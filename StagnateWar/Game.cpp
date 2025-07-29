@@ -91,7 +91,8 @@ SDL_AppResult Game::gameInit() {
    std::tuple<int, int> winSize = getWindowSize();
    windowWidth = std::get<0>(winSize);
    windowHeight = std::get<1>(winSize);
-   float fontSize = windowHeight * 0.05f;
+   float fontSize = windowHeight * 0.15f;
+   fontSize = std::max(12.0f, std::min(fontSize, 58.0f));
    const char* file = "assets/CourierPrime-Regular.ttf";
 
    font = TTF_OpenFont(file, fontSize);
