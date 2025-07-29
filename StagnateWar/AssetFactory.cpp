@@ -1,5 +1,7 @@
 #include "AssetFactory.h"
 
+
+
 Entity* AssetFactory::createEntity(const std::string& name) {
    auto it = entities.find(name);
    if (it == entities.end()) {
@@ -24,7 +26,7 @@ Entity* AssetFactory::createEntity(const std::string& name) {
       if (texture) {
          SpriteSheet* spriteSheet = new SpriteSheet(texture, data.rows, data.columns);
          entity->setSpriteSheet(spriteSheet);
-         entity->setSize(spriteSheet->getClip().w, spriteSheet->getClip().h);
+         entity->setSize(64, 64);
       }
       else {
          SDL_Log("Failed to load texture for entity %s", name.c_str());

@@ -72,7 +72,7 @@ private:
   
    std::unordered_map<std::string, EntityData> entities;
    std::unordered_map<std::string, std::string> texturePaths = {
-       {"ArmySpriteSheet", "assets/ArmySpriteSheet.jpg"},
+       {"ArmySpriteSheet", "assets/ArmySpriteSheet.png"},
        {"TileSpriteSheet", "assets/TileSpriteSheet.jpg"},
        {"defaultIcon", "assets/defaultIcon.png"},
        {"default", "assets/default.png"}
@@ -91,6 +91,7 @@ public:
 
    SDL_Texture* loadTexture(const std::string& name);
    Entity* createEntity(const std::string& name);
+   Entity& getEntity(const std::string& name);
 
 
 };
