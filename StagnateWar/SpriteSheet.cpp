@@ -22,3 +22,4 @@ void SpriteSheet::drawSprite(SDL_Renderer* renderer, SDL_FRect& rect){
 
    SDL_RenderTexture(renderer, texture, &clip, &rect);
 }
+

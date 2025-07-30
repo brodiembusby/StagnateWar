@@ -73,7 +73,7 @@ private:
    std::unordered_map<std::string, EntityData> entities;
    std::unordered_map<std::string, std::string> texturePaths = {
        {"ArmySpriteSheet", "assets/ArmySpriteSheet.png"},
-       {"TileSpriteSheet", "assets/TileSpriteSheet.jpg"},
+       {"TileSpriteSheet", "assets/TileSpriteSheet.png"},
        {"defaultIcon", "assets/defaultIcon.png"},
        {"default", "assets/default.png"}
    };
@@ -84,7 +84,9 @@ public:
       : textureManager(tm), entityManager(em), renderer(r),
       entities{
           {"player", {"player", Position(100.0f, 100.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}},
-          {"enemy", {"enemy", Position(200.0f, 200.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}}
+          {"enemy", {"enemy", Position(200.0f, 200.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}},
+          {"tile", {"tile", Position(0.0f, 0.0f), "TileSpriteSheet", spriteSheetRC, spriteSheetRC}}
+
       } {
    }
 

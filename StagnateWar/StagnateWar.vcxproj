@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="AssetFactory.h" />
     <ClInclude Include="constants.h" />
-    <ClInclude Include="Editor.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Level.h" />
     <ClInclude Include="Entity.h" />
@@ -33,7 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssetFactory.cpp" />
-    <ClCompile Include="Editor.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Level.cpp" />
     <ClCompile Include="main.cpp" />
@@ -136,7 +134,7 @@
       <AdditionalIncludeDirectories>C:\vslib\SDL3-3.2.10\include;C:\vslib\SDL3_image-3.2.4\include;C:\vslib\SDL3_ttf-3.2.2\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\vslib\SDL3-3.2.10\lib\x64;C:\vslib\SDL3_image-3.2.4\lib\x64;C:\vslib\SDL3_ttf-3.2.2\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL3.lib;SDL3_test.lib;SDL3_image.lib;SDL3_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>

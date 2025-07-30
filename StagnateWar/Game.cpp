@@ -118,7 +118,14 @@ SDL_AppResult Game::gameInit() {
    SDL_DestroySurface(icon);
 
    assetFactory = new AssetFactory(textureManager, entityManager, renderer);
-
+   
+   
+   level = new Level();
+   SDL_Texture* tileTexture = IMG_LoadTexture(renderer, "assets/TileSpriteSheet.png");
+   if (tileTexture) {
+      tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9); // Assuming 9x9 grid
+   }
+   
    Entity* player = assetFactory->createEntity("player");
    Entity* enemy = assetFactory->createEntity("enemy");
 
@@ -150,7 +157,13 @@ void Game::handleEvent(SDL_Event& event) {
    float speed = 200.0f * scaleFactor;
    float deltaTime = getDeltaTime();
    Entity* player = entityManager.getEntity("player");
-
+   
+   // Editor mode handling
+   if (isEditorMode) {
+      Level level;
+      level.updateTile(event);
+   }
+   // Player movement handling
    if (event.type == SDL_EVENT_KEY_DOWN) {
       if (player) {
          float newX = player->getPosition().getX();
@@ -172,8 +185,16 @@ void Game::handleEvent(SDL_Event& event) {
             newX += 10 * scaleFactor;
             break;
          case SDL_SCANCODE_E:
-            isEditorMode = true;
-            SDL_Log("Entering Editor Mode");
+            if (!isEditorMode) {
+               isEditorMode = true;
+
+               SDL_Log("Entering Editor Mode");
+            }
+            else {
+               isEditorMode = false;
+               SDL_Log("Exiting Editor Mode");
+               
+            }
             break;
          case SDL_SCANCODE_F11: // Toggle fullscreen with F11
             if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
@@ -229,20 +250,21 @@ SDL_AppResult Game::gameIterate() {
 
    // Update camera to follow the player
    Entity* player = entityManager.getEntity("player");
+   Entity* enemy = entityManager.getEntity("enemy");
+
    if (player) {
       updateCamera(player->getPosition());
    }
 
-   const SDL_Color SAGE_GREEN = { 178, 172, 136, 255 };
-   SDL_SetRenderDrawColor(renderer, SAGE_GREEN.r, SAGE_GREEN.g, SAGE_GREEN.b, SAGE_GREEN.a);
+   SDL_SetRenderDrawColor(renderer, 100,100,100,100);
    SDL_RenderClear(renderer);
 
-   Entity* enemy = entityManager.getEntity("enemy");
 
    // This might stay
    if (player) {
       SpriteSheet* playerSpriteSheet = player->getSpriteSheet();
       if (playerSpriteSheet) {
+         playerSpriteSheet->selectSprite(1, 0); 
          SDL_FRect destRect = player->getRect();
          // Adjust the destination rectangle to account for camera position
          destRect.x -= camera.getX();
@@ -266,6 +288,12 @@ SDL_AppResult Game::gameIterate() {
          SDL_Log("Enemy has no sprite sheet");
       }
    }
+
+   level->renderTiles(renderer, camera.getX(), camera.getY());
+   if (isEditorMode) {
+      level->renderGrid(renderer);
+   }
+
    if (showCollisionText) {
       const char* testText = "This game is a work in progress. PLease be patient with me.";
       textManager->setText(testText);
