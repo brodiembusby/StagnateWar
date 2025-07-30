@@ -13,4 +13,6 @@ public:
    void selectSprite(int x, int y);
    void drawSprite(SDL_Renderer* renderer,  SDL_FRect& rect) ;
    const SDL_FRect& getClip() const { return clip; }
+   SDL_Texture* getTexture() const { return texture; }
+   void setTexture(SDL_Texture* tex) { texture = tex; }
 };

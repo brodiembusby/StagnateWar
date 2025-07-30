@@ -45,6 +45,11 @@ void Game::gameQuit() {
    delete assetFactory;
    delete textManager;
 
+   if(level) {
+      delete level;
+      level = nullptr;
+   }
+
    if (renderer) {
       SDL_DestroyRenderer(renderer);
       renderer = nullptr;
@@ -116,35 +121,37 @@ SDL_AppResult Game::gameInit() {
    }
    // Someone said this gets rid of the memory leak IDK
    SDL_DestroySurface(icon);
-
-   assetFactory = new AssetFactory(textureManager, entityManager, renderer);
-   
-   
-   level = new Level();
-   SDL_Texture* tileTexture = IMG_LoadTexture(renderer, "assets/TileSpriteSheet.png");
-   if (tileTexture) {
-      tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9); // Assuming 9x9 grid
-   }
-   
-   Entity* player = assetFactory->createEntity("player");
-   Entity* enemy = assetFactory->createEntity("enemy");
-
-   // I Dont know if this changes much
-   if (player && enemy) {
-      float scaleFactor = windowHeight / 480.0f; // Scale relative to original 480 height
-      float entityWidth = 32.0f * scaleFactor;
-      float entityHeight = 32.0f * scaleFactor;
-      player->setSize(entityWidth, entityHeight);
-      enemy->setSize(entityWidth, entityHeight);
-      player->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
-      enemy->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
-   }
-
-
-   deltaTime = 1.0f / 60.0f;
-   lastTick = SDL_GetTicks();
-
-   return SDL_APP_SUCCESS;
+assetFactory = new AssetFactory(textureManager, entityManager, renderer);
+    SDL_Texture* tileTexture = assetFactory->loadTexture("TileSpriteSheet");
+    if (tileTexture) {
+        tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
+        if (tileSpriteSheet) {
+            SDL_Log("Tile sprite sheet created successfully");
+            level = new Level();
+            level->setAssetFactory(assetFactory); // Set before other operations
+            level->setSpriteSheet(tileSpriteSheet);
+        } else {
+            SDL_Log("Failed to create tile sprite sheet");
+            return SDL_APP_FAILURE;
+        }
+    } else {
+        SDL_Log("Failed to load TileSpriteSheet texture");
+        return SDL_APP_FAILURE;
+    }
+    Entity* player = assetFactory->createEntity("player");
+    Entity* enemy = assetFactory->createEntity("enemy");
+    if (player && enemy) {
+        float scaleFactor = windowHeight / 480.0f;
+        float entityWidth = 32.0f * scaleFactor;
+        float entityHeight = 32.0f * scaleFactor;
+        player->setSize(entityWidth, entityHeight);
+        enemy->setSize(entityWidth, entityHeight);
+        player->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
+        enemy->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
+    }
+    deltaTime = 1.0f / 60.0f;
+    lastTick = SDL_GetTicks();
+    return SDL_APP_SUCCESS;
 }
 
 void Game::handleEvent(SDL_Event& event) {
@@ -160,8 +167,9 @@ void Game::handleEvent(SDL_Event& event) {
    
    // Editor mode handling
    if (isEditorMode) {
-      Level level;
-      level.updateTile(event);
+      if (level) {
+         level->updateTile(event, camera.getX(), camera.getY()); // Pass camera coordinates
+      }
    }
    // Player movement handling
    if (event.type == SDL_EVENT_KEY_DOWN) {
@@ -196,7 +204,8 @@ void Game::handleEvent(SDL_Event& event) {
                
             }
             break;
-         case SDL_SCANCODE_F11: // Toggle fullscreen with F11
+         // Toggle fullscreen with F11
+         case SDL_SCANCODE_F11: 
             if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
                SDL_SetWindowFullscreen(window, 0); // Exit fullscreen
             }
@@ -216,8 +225,9 @@ void Game::handleEvent(SDL_Event& event) {
          player->setPosition(newX, newY);
       }
    }
+
+   // Update entity sizes
    else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-      // Update entity sizes
       Entity* player = entityManager.getEntity("player");
       Entity* enemy = entityManager.getEntity("enemy");
       if (player && enemy) {
@@ -228,8 +238,9 @@ void Game::handleEvent(SDL_Event& event) {
       }
    }
 
+   // Collision detection between player and enemy
    Entity* enemy = entityManager.getEntity("enemy");
-   if (player && enemy && player->hasCollided(*enemy)) {
+   if (player->hasCollided(*enemy)) {
       showCollisionText = true;
    }
    else {
@@ -258,12 +269,17 @@ SDL_AppResult Game::gameIterate() {
 
    SDL_SetRenderDrawColor(renderer, 100,100,100,100);
    SDL_RenderClear(renderer);
+   
+   if (level) {
+      level->renderTiles(renderer, camera.getX(), camera.getY());
 
+   }
 
    // This might stay
    if (player) {
       SpriteSheet* playerSpriteSheet = player->getSpriteSheet();
       if (playerSpriteSheet) {
+
          playerSpriteSheet->selectSprite(1, 0); 
          SDL_FRect destRect = player->getRect();
          // Adjust the destination rectangle to account for camera position
@@ -279,6 +295,7 @@ SDL_AppResult Game::gameIterate() {
    if (enemy) {
       SpriteSheet* enemySpriteSheet = enemy->getSpriteSheet();
       if (enemySpriteSheet) {
+         enemySpriteSheet->selectSprite(2, 0); 
          SDL_FRect destRect = enemy->getRect();
          destRect.x -= camera.getX();
          destRect.y -= camera.getY();
@@ -289,7 +306,7 @@ SDL_AppResult Game::gameIterate() {
       }
    }
 
-   level->renderTiles(renderer, camera.getX(), camera.getY());
+   
    if (isEditorMode) {
       level->renderGrid(renderer);
    }
@@ -297,7 +314,6 @@ SDL_AppResult Game::gameIterate() {
    if (showCollisionText) {
       const char* testText = "This game is a work in progress. PLease be patient with me.";
       textManager->setText(testText);
-
       textManager->display(renderer, windowWidth, windowHeight);
    }
 

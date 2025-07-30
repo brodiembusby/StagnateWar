@@ -1,5 +1,5 @@
 #include "AssetFactory.h"
-
+#include "Tile.h"
 
 
 Entity* AssetFactory::createEntity(const std::string& name) {
@@ -16,6 +16,9 @@ Entity* AssetFactory::createEntity(const std::string& name) {
    else if (data.type == "enemy") {
       entity = new PartyMember();
    }
+   else if (data.type == "tile") {
+      entity = new Tile();
+   }
    else {
       SDL_Log("Unknown entity type: %s", data.type.c_str());
       return nullptr;
@@ -26,7 +29,6 @@ Entity* AssetFactory::createEntity(const std::string& name) {
       if (texture) {
          SpriteSheet* spriteSheet = new SpriteSheet(texture, data.rows, data.columns);
          entity->setSpriteSheet(spriteSheet);
-         entity->setSize(64, 64);
       }
       else {
          SDL_Log("Failed to load texture for entity %s", name.c_str());

@@ -20,6 +20,7 @@ private:
    TTF_Font* font = nullptr;
    TextManager* textManager = nullptr;
    Level* level = nullptr; 
+
    Position camera;
    bool showCollisionText = false; 
    bool isEditorMode = false;
