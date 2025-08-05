@@ -1,26 +1,38 @@
-//#pragma once
-//#include "Position.h"
-//#include "SpriteSheet.h"
-//#include "Tile.h"
-//#include "Game.h"
-//class Level
-//{
-//private:
-//   
-//   std::vector<Position> spawnPoints;
-//   std::vector<Tile*> tiles;
-//   SpriteSheet backgroundSprite; // Optional background
-//
-//public:
-//   
-//   void loadLevel(); // Placeholder
-//   void render(Game& sdl) {
-//      //// Render background first
-//      //SDL_FRect bgRect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
-//      //sdl.renderSprite(backgroundSprite, bgRect);
-//      //// Render tiles
-//      //for (Tile* tile : tiles) {
-//      //   sdl.renderSprite(tile->getSprite(), tile->getRect());
-//      //}
-//   }
-//};
+#pragma once
+#include "Tile.h"
+#include <SDL3/SDL.h>
+#include "Entity.h"
+#include "AssetFactory.h"  
+class Level : public Entity {
+private:
+   static const int WIDTH = 16;
+   static const int HEIGHT = 12;
+   Tile* level[WIDTH][HEIGHT];
+   bool isPlacingWall = false;
+   SpriteSheet* tileSpriteSheet = nullptr;
+   AssetFactory* assetFactory = nullptr; 
+
+public:
+   Level(AssetFactory* af = nullptr) : assetFactory(af) {
+      for (int x = 0; x < WIDTH; x++) {
+         for (int y = 0; y < HEIGHT; y++) {
+            level[x][y] = nullptr;
+         }
+      }
+   }
+   ~Level() {
+      for (int x = 0; x < WIDTH; x++) {
+         for (int y = 0; y < HEIGHT; y++) {
+            delete level[x][y];
+         }
+      }
+      // Note: tileSpriteSheet is deleted in Game::gameQuit
+   }
+   void setAssetFactory(AssetFactory* af) {
+      assetFactory = af;
+      SDL_Log("AssetFactory set in Level: %p", assetFactory);
+   }
+   void renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY);
+   void renderGrid(SDL_Renderer* renderer);
+   void updateTile(SDL_Event& event, float cameraX, float cameraY); // Add camera parameters
+};

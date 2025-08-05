@@ -17,6 +17,12 @@ public:
    // Getters and Setters
    virtual SDL_FRect& getRect() { return rect; }
    virtual const SDL_FRect& getRect() const { return rect; } 
+   virtual void setRect(float x, float y, float width, float height) {
+      rect.x = x;
+      rect.y = y;
+      rect.w = width;
+      rect.h = height;
+   }
    
    virtual Position& getPosition() { return position; }
    virtual const Position& getPosition() const { return position; } 
