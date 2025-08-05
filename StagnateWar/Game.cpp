@@ -122,35 +122,13 @@ SDL_AppResult Game::gameInit() {
    // Someone said this gets rid of the memory leak IDK
    SDL_DestroySurface(icon);
 
-
-   //assetFactory = new AssetFactory(renderer);
-   //    SDL_Texture* tileTexture = assetFactory->loadTexture("TileSpriteSheet");
-   // if (tileTexture) {
-   //     tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
-   //     if (tileSpriteSheet) {
-   //         SDL_Log("Tile sprite sheet created successfully");
-   //         level = new Level();
-   //         level->setAssetFactory(assetFactory); // Set before other operations
-   //         level->setSpriteSheet(tileSpriteSheet);
-   //     } else {
-   //         SDL_Log("Failed to create tile sprite sheet");
-   //         return SDL_APP_FAILURE;
-   //     }
-   // } else {
-   //     SDL_Log("Failed to load TileSpriteSheet texture");
-   //     return SDL_APP_FAILURE;
-   // }
-
-       // Initialize asset factory and load tile texture
    assetFactory = new AssetFactory(renderer);
    SDL_Texture* tileTexture = assetFactory->loadTexture("TileSpriteSheet");
    if (tileTexture) {
       tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
       if (tileSpriteSheet) {
          SDL_Log("Tile sprite sheet created successfully");
-         level = new Level();
-         level->setAssetFactory(assetFactory);
-         level->setSpriteSheet(tileSpriteSheet);
+         level = new Level(assetFactory);
       }
       else {
          SDL_Log("Failed to create tile sprite sheet");
@@ -209,9 +187,8 @@ void Game::handleEvent(SDL_Event& event) {
    float scaleFactor = windowHeight / 480.0f;
    float speed = 200.0f * scaleFactor;
    float deltaTime = getDeltaTime();
-   //Entity* player = assetFactory->getEntity("player");
 
-       // Find player entity
+   // Find player entity
    Entity* player = findEntity("player");
    
    // Editor mode handling
@@ -227,6 +204,17 @@ void Game::handleEvent(SDL_Event& event) {
          float playerHeight = player->getRect().h;
 
          switch (event.key.scancode) {
+         case SDL_SCANCODE_M:
+            if (isEditorMode) {
+               level->saveToFile("assets/map.json");
+               
+            }
+            break;
+         case SDL_SCANCODE_L:
+            if (isEditorMode) {
+               level->loadFromFile("assets/map.json");
+            }
+            break;
          case SDL_SCANCODE_W:
             newY -= 10 * scaleFactor;
             break;
@@ -323,7 +311,7 @@ SDL_AppResult Game::gameIterate() {
       SpriteSheet* spriteSheet = entity->getSpriteSheet();
       if (spriteSheet) {
          int spriteRow = (entity == assetFactory->getEntity("player")) ? 1 : 2;
-         spriteSheet->selectSprite(spriteRow, 0);
+         spriteSheet->selectCurrentSprite(spriteRow, 0);
          SDL_FRect destRect = entity->getRect();
          destRect.x -= camera.getX();
          destRect.y -= camera.getY();

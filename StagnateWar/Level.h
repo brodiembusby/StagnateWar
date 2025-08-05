@@ -3,6 +3,10 @@
 #include <SDL3/SDL.h>
 #include "Entity.h"
 #include "AssetFactory.h"  
+#include "json.hpp"
+#include <fstream>
+#include <string>
+
 class Level : public Entity {
 private:
    static const int WIDTH = 16;
@@ -13,6 +17,7 @@ private:
    AssetFactory* assetFactory = nullptr; 
 
 public:
+  
    Level(AssetFactory* af = nullptr) : assetFactory(af) {
       for (int x = 0; x < WIDTH; x++) {
          for (int y = 0; y < HEIGHT; y++) {
@@ -20,6 +25,7 @@ public:
          }
       }
    }
+
    ~Level() {
       for (int x = 0; x < WIDTH; x++) {
          for (int y = 0; y < HEIGHT; y++) {
@@ -35,4 +41,6 @@ public:
    void renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY);
    void renderGrid(SDL_Renderer* renderer);
    void updateTile(SDL_Event& event, float cameraX, float cameraY); // Add camera parameters
+   void saveToFile(const std::string& filename);
+   void loadFromFile(const std::string& filename);
 };
