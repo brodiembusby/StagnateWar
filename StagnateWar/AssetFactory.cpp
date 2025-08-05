@@ -3,17 +3,16 @@
 
 
 Entity* AssetFactory::createEntity(const std::string& name) {
+   // Look up entity data by name
    auto it = entities.find(name);
    if (it == entities.end()) {
       SDL_Log("Entity %s not found in entities", name.c_str());
       return nullptr;
    }
    EntityData& data = it->second;
+   // Create entity based on type (PartyMember for player/enemy, Tile for tile)
    Entity* entity = nullptr;
-   if (data.type == "player") {
-      entity = new PartyMember();
-   }
-   else if (data.type == "enemy") {
+   if (data.type == "player" || data.type == "enemy") {
       entity = new PartyMember();
    }
    else if (data.type == "tile") {
@@ -23,6 +22,7 @@ Entity* AssetFactory::createEntity(const std::string& name) {
       SDL_Log("Unknown entity type: %s", data.type.c_str());
       return nullptr;
    }
+   // Set position and load texture, create sprite sheet
    if (entity) {
       entity->setPosition(data.position.getX(), data.position.getY());
       SDL_Texture* texture = loadTexture(data.textureName);
@@ -35,6 +35,7 @@ Entity* AssetFactory::createEntity(const std::string& name) {
          delete entity;
          return nullptr;
       }
+      // Add to entity manager and return
       entityManager.addEntity(name, entity);
       return entity;
    }

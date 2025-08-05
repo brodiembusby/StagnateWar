@@ -28,11 +28,9 @@ private:
    Uint64 lastTick = 0;
 
    SpriteSheet* tileSpriteSheet = nullptr;
-protected:
-
-   TextureManager textureManager;
-   EntityManager entityManager;
    AssetFactory* assetFactory = nullptr;
+
+   std::vector<Entity*> entities;
 
 public:
    Game();
@@ -46,6 +44,7 @@ public:
    
    float getDeltaTime() const { return deltaTime; }
    void updateCamera(Position& target);
+   Entity* findEntity(const std::string& name);
 
    std::tuple<int, int> getWindowSize() const {
       int width, height;

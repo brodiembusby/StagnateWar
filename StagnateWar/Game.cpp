@@ -121,34 +121,80 @@ SDL_AppResult Game::gameInit() {
    }
    // Someone said this gets rid of the memory leak IDK
    SDL_DestroySurface(icon);
-assetFactory = new AssetFactory(textureManager, entityManager, renderer);
-    SDL_Texture* tileTexture = assetFactory->loadTexture("TileSpriteSheet");
-    if (tileTexture) {
-        tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
-        if (tileSpriteSheet) {
-            SDL_Log("Tile sprite sheet created successfully");
-            level = new Level();
-            level->setAssetFactory(assetFactory); // Set before other operations
-            level->setSpriteSheet(tileSpriteSheet);
-        } else {
-            SDL_Log("Failed to create tile sprite sheet");
-            return SDL_APP_FAILURE;
-        }
-    } else {
-        SDL_Log("Failed to load TileSpriteSheet texture");
-        return SDL_APP_FAILURE;
-    }
-    Entity* player = assetFactory->createEntity("player");
-    Entity* enemy = assetFactory->createEntity("enemy");
-    if (player && enemy) {
-        float scaleFactor = windowHeight / 480.0f;
-        float entityWidth = 32.0f * scaleFactor;
-        float entityHeight = 32.0f * scaleFactor;
-        player->setSize(entityWidth, entityHeight);
-        enemy->setSize(entityWidth, entityHeight);
-        player->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
-        enemy->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
-    }
+
+
+   //assetFactory = new AssetFactory(renderer);
+   //    SDL_Texture* tileTexture = assetFactory->loadTexture("TileSpriteSheet");
+   // if (tileTexture) {
+   //     tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
+   //     if (tileSpriteSheet) {
+   //         SDL_Log("Tile sprite sheet created successfully");
+   //         level = new Level();
+   //         level->setAssetFactory(assetFactory); // Set before other operations
+   //         level->setSpriteSheet(tileSpriteSheet);
+   //     } else {
+   //         SDL_Log("Failed to create tile sprite sheet");
+   //         return SDL_APP_FAILURE;
+   //     }
+   // } else {
+   //     SDL_Log("Failed to load TileSpriteSheet texture");
+   //     return SDL_APP_FAILURE;
+   // }
+
+       // Initialize asset factory and load tile texture
+   assetFactory = new AssetFactory(renderer);
+   SDL_Texture* tileTexture = assetFactory->loadTexture("TileSpriteSheet");
+   if (tileTexture) {
+      tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
+      if (tileSpriteSheet) {
+         SDL_Log("Tile sprite sheet created successfully");
+         level = new Level();
+         level->setAssetFactory(assetFactory);
+         level->setSpriteSheet(tileSpriteSheet);
+      }
+      else {
+         SDL_Log("Failed to create tile sprite sheet");
+         return SDL_APP_FAILURE;
+      }
+   }
+   else {
+      SDL_Log("Failed to load TileSpriteSheet texture");
+      return SDL_APP_FAILURE;
+   }
+
+   // Create and store entities
+   Entity* player = assetFactory->createEntity("player");
+   if (player) {
+      entities.push_back(player);
+   }
+   else {
+      SDL_Log("Failed to create player entity");
+      return SDL_APP_FAILURE;
+   }
+
+   Entity* enemy = assetFactory->createEntity("enemy");
+   if (enemy) {
+      entities.push_back(enemy);
+   }
+   else {
+      SDL_Log("Failed to create enemy entity");
+      return SDL_APP_FAILURE;
+   }
+
+   // Set initial entity sizes and positions
+   float scaleFactor = windowHeight / 480.0f;
+   float entityWidth = 32.0f * scaleFactor;
+   float entityHeight = 32.0f * scaleFactor;
+   for (Entity* entity : entities) {
+      entity->setSize(entityWidth, entityHeight);
+      if (entity == player) {
+         entity->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
+      }
+      else if (entity == enemy) {
+         entity->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
+      }
+   }
+
     deltaTime = 1.0f / 60.0f;
     lastTick = SDL_GetTicks();
     return SDL_APP_SUCCESS;
@@ -163,13 +209,14 @@ void Game::handleEvent(SDL_Event& event) {
    float scaleFactor = windowHeight / 480.0f;
    float speed = 200.0f * scaleFactor;
    float deltaTime = getDeltaTime();
-   Entity* player = entityManager.getEntity("player");
+   //Entity* player = assetFactory->getEntity("player");
+
+       // Find player entity
+   Entity* player = findEntity("player");
    
    // Editor mode handling
-   if (isEditorMode) {
-      if (level) {
-         level->updateTile(event, camera.getX(), camera.getY()); // Pass camera coordinates
-      }
+   if (isEditorMode && level) {
+      level->updateTile(event, camera.getX(), camera.getY());
    }
    // Player movement handling
    if (event.type == SDL_EVENT_KEY_DOWN) {
@@ -195,7 +242,6 @@ void Game::handleEvent(SDL_Event& event) {
          case SDL_SCANCODE_E:
             if (!isEditorMode) {
                isEditorMode = true;
-
                SDL_Log("Entering Editor Mode");
             }
             else {
@@ -227,20 +273,19 @@ void Game::handleEvent(SDL_Event& event) {
    }
 
    // Update entity sizes
-   else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-      Entity* player = entityManager.getEntity("player");
-      Entity* enemy = entityManager.getEntity("enemy");
-      if (player && enemy) {
-         float entityWidth = 32.0f * scaleFactor;
-         float entityHeight = 32.0f * scaleFactor;
-         player->setSize(entityWidth, entityHeight);
-         enemy->setSize(entityWidth, entityHeight);
+    // Update entity sizes on window resize
+   if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+      float entityWidth = 32.0f * scaleFactor;
+      float entityHeight = 32.0f * scaleFactor;
+      for (Entity* entity : entities) {
+         entity->setSize(entityWidth, entityHeight);
       }
    }
 
-   // Collision detection between player and enemy
-   Entity* enemy = entityManager.getEntity("enemy");
-   if (player->hasCollided(*enemy)) {
+   // Collision detection
+   Entity* enemy = findEntity("enemy");
+
+   if (player && enemy && player->hasCollided(*enemy)) {
       showCollisionText = true;
    }
    else {
@@ -258,11 +303,9 @@ SDL_AppResult Game::gameIterate() {
    std::tuple<int, int> winSize = getWindowSize();
    windowWidth = std::get<0>(winSize);
    windowHeight = std::get<1>(winSize);
-
-   // Update camera to follow the player
-   Entity* player = entityManager.getEntity("player");
-   Entity* enemy = entityManager.getEntity("enemy");
-
+   
+   // Update camera to follow player
+   Entity* player = findEntity("player");
    if (player) {
       updateCamera(player->getPosition());
    }
@@ -275,38 +318,22 @@ SDL_AppResult Game::gameIterate() {
 
    }
 
-   // This might stay
-   if (player) {
-      SpriteSheet* playerSpriteSheet = player->getSpriteSheet();
-      if (playerSpriteSheet) {
-
-         playerSpriteSheet->selectSprite(1, 0); 
-         SDL_FRect destRect = player->getRect();
-         // Adjust the destination rectangle to account for camera position
+   // Render entities
+   for (Entity* entity : entities) {
+      SpriteSheet* spriteSheet = entity->getSpriteSheet();
+      if (spriteSheet) {
+         int spriteRow = (entity == assetFactory->getEntity("player")) ? 1 : 2;
+         spriteSheet->selectSprite(spriteRow, 0);
+         SDL_FRect destRect = entity->getRect();
          destRect.x -= camera.getX();
          destRect.y -= camera.getY();
-         playerSpriteSheet->drawSprite(renderer, destRect);
+         spriteSheet->drawSprite(renderer, destRect);
       }
       else {
-         SDL_Log("Player has no sprite sheet");
-      }
-   }
-   // This will be replaced with a more efficent structure later
-   if (enemy) {
-      SpriteSheet* enemySpriteSheet = enemy->getSpriteSheet();
-      if (enemySpriteSheet) {
-         enemySpriteSheet->selectSprite(2, 0); 
-         SDL_FRect destRect = enemy->getRect();
-         destRect.x -= camera.getX();
-         destRect.y -= camera.getY();
-         enemySpriteSheet->drawSprite(renderer, destRect);
-      }
-      else {
-         SDL_Log("Enemy has no sprite sheet");
+         SDL_Log("Entity has no sprite sheet");
       }
    }
 
-   
    if (isEditorMode) {
       level->renderGrid(renderer);
    }
@@ -337,4 +364,13 @@ void Game::updateCamera(Position& target) {
 
    camera.setX(cameraX);
    camera.setY(cameraY);
+}
+
+Entity* Game::findEntity(const std::string& name) {
+   for (Entity* entity : entities) {
+      if (entity == assetFactory->getEntity(name)) {
+         return entity;
+      }
+   }
+   return nullptr;
 }
