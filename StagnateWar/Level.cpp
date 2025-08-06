@@ -1,4 +1,54 @@
 #include "Level.h"
+
+// Sets a default tiles set in the background
+//Level::Level(AssetFactory* af) : assetFactory(af) {
+//   for (int x = 0; x < WIDTH; x++) {
+//      for (int y = 0; y < HEIGHT; y++) {
+//         level[x][y] = nullptr;
+//         if (assetFactory) {
+//            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile"));
+//            if (level[x][y]) {
+//               Tile* tile = level[x][y];
+//               tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+//               tile->setIsWalkable(true); // Default to walkable (floor)
+//               tile->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+//               if (tileSpriteSheet) {
+//                  tile->setSpriteSheet(tileSpriteSheet);
+//                  //tile->getSpriteSheet()->selectCurrentSprite(0, 4); // Default sprite
+//               }
+//            }
+//            else {
+//               SDL_Log("Failed to create tile at (%d, %d)", x, y);
+//               level[x][y] = new Tile(); // Fallback
+//               level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+//               level[x][y]->setIsWalkable(true);
+//               level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+//            }
+//         }
+//         else {
+//            level[x][y] = new Tile(); // Fallback if no assetFactory
+//            level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+//            level[x][y]->setIsWalkable(true);
+//            level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+//         }
+//      }
+//   }
+//}
+
+void Level::editorEvent(SDL_Event& event) {
+   // Handle events related to the fight menu here
+   // This is a placeholder for future functionality
+   if (event.type == SDL_EVENT_KEY_DOWN) {
+      switch (event.key.scancode) {
+      case SDL_SCANCODE_M:
+         saveToFile("assets/map.json");
+         break;
+      case SDL_SCANCODE_L:
+         loadFromFile("assets/map.json");
+         break;
+      }
+   }
+}
 // Render the tiles in the level, adjusting for camera position.
 void Level::renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY) {
    for (int y = 0; y < HEIGHT; y++) {
@@ -9,9 +59,7 @@ void Level::renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY) {
             rect.x -= cameraX;
             rect.y -= cameraY;
             SpriteSheet* ss = tile->getSpriteSheet();
-            if (ss) {
-               ss->drawSprite(renderer, rect);
-            }
+            if (ss) ss->drawSprite(renderer, rect);
 
          }
       }
@@ -66,11 +114,107 @@ void Level::updateTile(SDL_Event& event, float cameraX, float cameraY) {
             tile->setPosition(gridX * DEFAULT_WIDTH, gridY * DEFAULT_HEIGHT);
             tile->setIsWalkable(!isPlacingWall);
             tile->setRect(gridX * DEFAULT_WIDTH, gridY * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-         } else {
+         }
+         else {
             SDL_Log("Failed to create or cast tile entity at: (%d, %d)", gridX, gridY);
          }
-      } else {
+      }
+      else {
          SDL_Log("Invalid grid coordinates: (%d, %d)", gridX, gridY);
       }
+   }
+}
+
+void Level::saveToFile(const std::string& filename) {
+   nlohmann::json j;
+   j["width"] = WIDTH;
+   j["height"] = HEIGHT;
+   j["tiles"] = nlohmann::json::array();
+
+   for (int y = 0; y < HEIGHT; y++) {
+      for (int x = 0; x < WIDTH; x++) {
+         Tile* tile = level[x][y];
+         nlohmann::json tileJson;
+         tileJson["x"] = x;
+         tileJson["y"] = y;
+         tileJson["isWalkable"] = tile ? tile->getIsWalkable() : true;
+         if (tile && tile->getSpriteSheet()) {
+            tileJson["selectedTileX"] = tile->getSpriteSheet()->getSpriteIndexX();
+            tileJson["selectedTileY"] = tile->getSpriteSheet()->getSpriteIndexY();
+         }
+         else {
+            tileJson["selectedTileX"] = 0; // Default sprite index
+            tileJson["selectedTileY"] = 4; // Default sprite index
+         }
+         j["tiles"].push_back(tileJson);
+      }
+   }
+   std::ofstream file(filename);
+   if (file.is_open()) {
+      file << j.dump(4); // Pretty print with 4-space indent
+      file.close();
+      SDL_Log("Map saved to %s", filename.c_str());
+   }
+   else {
+      SDL_Log("Failed to open file %s for saving", filename.c_str());
+   }
+}
+
+void Level::loadFromFile(const std::string& filename) {
+   std::ifstream file(filename);
+   if (!file.is_open()) {
+      SDL_Log("Failed to open file %s for loading", filename.c_str());
+      return;
+   }
+
+   nlohmann::json j;
+   try {
+      file >> j;
+      file.close();
+
+      for (int x = 0; x < WIDTH; x++) {
+         for (int y = 0; y < HEIGHT; y++) {
+            delete level[x][y];
+            level[x][y] = nullptr;
+         }
+      }
+
+      // Load tiles
+      for (const auto& tileJson : j["tiles"]) {
+         int x = tileJson["x"].get<int>();
+         int y = tileJson["y"].get<int>();
+         bool isWalkable = tileJson["isWalkable"].get<bool>();
+         int selectedTileX = tileJson.value("selectedTileX", 0); // Default to 0 if missing
+         int selectedTileY = tileJson.value("selectedTileY", 4); // Default to 4 if missing
+
+         if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && assetFactory) {
+            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile"));
+            if (level[x][y]) {
+               Tile* tile = level[x][y];
+               tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+               tile->setIsWalkable(isWalkable);
+               tile->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+               if (tileSpriteSheet) {
+                  tile->setSpriteSheet(tileSpriteSheet);
+                  //tile->getSpriteSheet()->selectCurrentSprite(selectedTileX, selectedTileY); // Use selectSprite
+               }
+            }
+            else {
+               SDL_Log("Failed to create tile at (%d, %d)", x, y);
+               level[x][y] = new Tile(); // Fallback
+               level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+               level[x][y]->setIsWalkable(isWalkable);
+               level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+            }
+         }
+         else {
+            SDL_Log("Invalid grid coordinates or assetFactory null at (%d, %d)", x, y);
+         }
+      }
+      SDL_Log("Map loaded from %s", filename.c_str());
+   }
+   catch (const nlohmann::json::parse_error& e) {
+      SDL_Log("JSON parse error: %s", e.what());
+      file.close();
    }
 }

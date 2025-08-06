@@ -11,12 +11,7 @@ public:
    void display(SDL_Renderer* renderer, int window_width, int window_height);
    void setText(const char* text) { this->text = text; }
    const char* getText() { return text; }
-   //void setFont(TTF_Font* newFont) {
-   //   if (font) {
-   //      TTF_CloseFont(font);
-   //   }
-   //   font = newFont;
-   //}
+   void menuEvent(SDL_Event& event);
 
 private:
    TTF_Font* font;

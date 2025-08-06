@@ -32,7 +32,6 @@ public:
       rect.x = x;
       rect.y = y;
    }
-
    virtual void setSpriteSheet(SpriteSheet* ss) { spriteSheet = ss; }
    virtual SpriteSheet* getSpriteSheet() const { return spriteSheet; }
 
@@ -40,7 +39,9 @@ public:
       rect.w = width;
       rect.h = height;
    }
-   // Methods
+
+   //Methods
+   void playerEvent(SDL_Event& event, Entity* player);
    bool hasCollided(const Entity& other) const {
       return SDL_HasRectIntersectionFloat(&rect, &other.rect);
    }

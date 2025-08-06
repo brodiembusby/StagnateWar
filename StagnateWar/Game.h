@@ -14,23 +14,26 @@
 class Game {
 private:
 
+   // SDL Components and Main Components
    SDL_Window* window = nullptr;
    SDL_Renderer* renderer = nullptr;
   
    TTF_Font* font = nullptr;
    TextManager* textManager = nullptr;
    Level* level = nullptr; 
-
-   Position camera;
-   bool showCollisionText = false; 
-   bool isEditorMode = false;
-   float deltaTime = 0.0f;
-   Uint64 lastTick = 0;
-
    SpriteSheet* tileSpriteSheet = nullptr;
    AssetFactory* assetFactory = nullptr;
 
    std::vector<Entity*> entities;
+
+   Position camera;
+   Uint64 lastTick = 0;
+   float deltaTime = 0.0f;
+
+   // Flags
+   bool showCollisionText = false; 
+   bool isEditorMode = false;
+   bool isMenuing = false; 
 
 public:
    Game();
@@ -42,17 +45,10 @@ public:
    SDL_AppResult gameInit();
    SDL_AppResult gameIterate();
    
+
    float getDeltaTime() const { return deltaTime; }
    void updateCamera(Position& target);
    Entity* findEntity(const std::string& name);
 
-   std::tuple<int, int> getWindowSize() const {
-      int width, height;
-      if (!SDL_GetWindowSize(window, &width, &height)) {
-         SDL_Log("Failed to get window size: %s", SDL_GetError());
-         width = 640; // Fallback default
-         height = 480;
-      }
-      return std::make_tuple(width, height);
-   }
+   std::tuple<int, int> getWindowSize() const;
 };

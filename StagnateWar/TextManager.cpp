@@ -12,7 +12,7 @@ TextManager::~TextManager() {
 }
 
 void TextManager::display(SDL_Renderer* renderer, int window_width, int window_height) {
-   
+
    float gui_height = window_height / 3.0f;
    float gui_y = window_height - gui_height;
 
@@ -61,4 +61,40 @@ void TextManager::display(SDL_Renderer* renderer, int window_width, int window_h
    // Clean up texture
    SDL_DestroyTexture(textTexture);
    textTexture = nullptr;
+}
+
+void TextManager::menuEvent(SDL_Event& event) {
+   
+   if (event.type == SDL_EVENT_KEY_DOWN) {
+      switch (event.key.scancode)
+      {
+      case SDL_SCANCODE_W:
+         SDL_Log("W Pressed");
+         break;
+      case SDL_SCANCODE_S:
+         SDL_Log("W Pressed");
+
+         break;
+      case SDL_SCANCODE_A:
+         SDL_Log("W Pressed");
+
+         break;
+      case SDL_SCANCODE_D:
+         SDL_Log("W Pressed");
+
+         break;
+      case SDL_SCANCODE_P:
+         SDL_Log("p Pressed");
+
+         break;
+
+
+      default:
+         break;
+      }
+
+      if (event.key.scancode == SDL_SCANCODE_ESCAPE) {
+         SDL_Log("Fight menu closed");
+      }
+   }
 }
