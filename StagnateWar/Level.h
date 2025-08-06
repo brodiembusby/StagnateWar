@@ -25,6 +25,8 @@ public:
          }
       }
    }
+   // Constructor initializes the level with tiles using the provided AssetFactory.
+   //Level(AssetFactory* af = nullptr);
 
    ~Level() {
       for (int x = 0; x < WIDTH; x++) {
@@ -43,4 +45,6 @@ public:
    void updateTile(SDL_Event& event, float cameraX, float cameraY); // Add camera parameters
    void saveToFile(const std::string& filename);
    void loadFromFile(const std::string& filename);
+
+   void editorEvent(SDL_Event& event);
 };

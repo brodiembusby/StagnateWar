@@ -1,5 +1,6 @@
 #include "Level.h"
 
+// Sets a default tiles set in the background
 //Level::Level(AssetFactory* af) : assetFactory(af) {
 //   for (int x = 0; x < WIDTH; x++) {
 //      for (int y = 0; y < HEIGHT; y++) {
@@ -34,6 +35,20 @@
 //   }
 //}
 
+void Level::editorEvent(SDL_Event& event) {
+   // Handle events related to the fight menu here
+   // This is a placeholder for future functionality
+   if (event.type == SDL_EVENT_KEY_DOWN) {
+      switch (event.key.scancode) {
+      case SDL_SCANCODE_M:
+         saveToFile("assets/map.json");
+         break;
+      case SDL_SCANCODE_L:
+         loadFromFile("assets/map.json");
+         break;
+      }
+   }
+}
 // Render the tiles in the level, adjusting for camera position.
 void Level::renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY) {
    for (int y = 0; y < HEIGHT; y++) {
@@ -44,9 +59,7 @@ void Level::renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY) {
             rect.x -= cameraX;
             rect.y -= cameraY;
             SpriteSheet* ss = tile->getSpriteSheet();
-            if (ss) {
-               ss->drawSprite(renderer, rect);
-            }
+            if (ss) ss->drawSprite(renderer, rect);
 
          }
       }
@@ -162,7 +175,7 @@ void Level::loadFromFile(const std::string& filename) {
       for (int x = 0; x < WIDTH; x++) {
          for (int y = 0; y < HEIGHT; y++) {
             delete level[x][y];
-            level[x][y] = nullptr; 
+            level[x][y] = nullptr;
          }
       }
 
