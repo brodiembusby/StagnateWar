@@ -1,11 +1,9 @@
 #pragma once
 #include "Entity.h"
-#include <string>
-/// <summary>
-/// Defines the different types of items.
-/// </summary>
-enum ItemType
-{
+#include <string> 
+
+
+enum class ItemType{
    WEAPON,
    ARMOUR,
    CONSUMABLE,
@@ -13,9 +11,7 @@ enum ItemType
 
 };
 
-/// <summary>
-/// Wrapper class for an item in the game.
-/// </summary>
+
 class Item {
 
 private:
@@ -27,18 +23,14 @@ public:
 
    Item() : value(0), name("") {}
 
-
-   std::string getName() { return name; };
+   std::string getName() { return name; }
    void setName(std::string name) { this->name = name; }
-
 
    int getValue() { return value; }
    void setValue(int value) { this->value = value; }
 };
 
-/// <summary>
-/// Represents an inventory containing up to 10 items.
-/// </summary>
+
 
 struct Inventory {
 
@@ -46,10 +38,7 @@ struct Inventory {
    
 };
 
-/// <summary>
-/// A class representing a party member in the game. A party entity is a type of 
-/// entity that has an item and stats.
-/// </summary>
+
 class PartyMember : public Entity {
 private:
    Item item;

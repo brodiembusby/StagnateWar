@@ -35,6 +35,8 @@ private:
    bool isEditorMode = false;
    bool isMenuing = false; 
 
+   std::string option = "default";
+
 public:
    Game();
    ~Game();
@@ -57,8 +59,8 @@ public:
    float getDeltaTime() const { return deltaTime; }
    void updateCamera(Position& target);
    Entity* findEntity(const std::string& name);
-
-   //void clampPlayerPosition(Entity* player);
+   void setOption(const std::string& opt) { option = opt; }
+   std::string getOption() const { return option; }
 
    std::tuple<int, int> getWindowSize() const;
 };

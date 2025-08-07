@@ -96,16 +96,11 @@ SDL_AppResult Game::gameInit() {
 
    }
 
-   //int windowWidth, windowHeight;
-   //std::tuple<int, int> winSize = getWindowSize();
-   //windowWidth = std::get<0>(winSize);
-   //windowHeight = std::get<1>(winSize);
-   //float fontSize = windowHeight * 0.15f;
    float fontSize = 480 * 0.15f; // Base font size on logical height
    fontSize = std::max(12.0f, std::min(fontSize, 58.0f));
-   const char* file = "assets/CourierPrime-Regular.ttf";
+  std::string file = "assets/CourierPrime-Regular.ttf";
 
-   font = TTF_OpenFont(file, fontSize);
+   font = TTF_OpenFont(file.c_str(), fontSize);
    if (!font) {
       SDL_Log("Couldnt open TTF font file: %s", SDL_GetError());
       return SDL_APP_FAILURE;
@@ -212,29 +207,17 @@ void Game::handleEvent(SDL_Event& event) {
       }
    }
    if (isMenuing) {
-      textManager->menuEvent(event);
+      std::string menu = textManager->menuEvent(event);
+      setOption(menu);
+      if (menu != "") {
+         isMenuing = false; // Exit menu after selection
+      }
    }
    // Editor mode handling
    if (isEditorMode && level) {
       level->editorEvent(event);
       level->updateTile(event, camera.getX(), camera.getY());
    }
-
-   //// TODO: Need to Fix this sorta works but not really
-   //// Update entity sizes on window resize
-   //int windowWidth, windowHeight;
-   //std::tuple<int, int> winSize = getWindowSize();
-   //windowWidth = std::get<0>(winSize);
-   //windowHeight = std::get<1>(winSize);
-   //float scaleFactor = windowHeight / 480.0f;
-   //if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-   //   float entityWidth = 32.0f * scaleFactor;
-   //   float entityHeight = 32.0f * scaleFactor;
-   //   for (Entity* entity : entities) {
-   //      entity->setSize(entityWidth, entityHeight);
-   //   }
-   //}
-
 
    Entity* player = findEntity("player");
    Entity* enemy = findEntity("enemy");
@@ -253,6 +236,14 @@ void Game::handleEvent(SDL_Event& event) {
 
 }
 SDL_AppResult Game::gameIterate() {
+   int logicalWidth, logicalHeight;
+   SDL_RendererLogicalPresentation mode;
+   if (!SDL_GetRenderLogicalPresentation(renderer, &logicalWidth, &logicalHeight, &mode)) {
+      SDL_Log("Failed to get logical presentation: %s", SDL_GetError());
+      return SDL_APP_FAILURE;
+   }
+
+   
    Uint64 currentTick = SDL_GetTicks();
    deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
@@ -287,19 +278,19 @@ SDL_AppResult Game::gameIterate() {
    }
 
    if (isMenuing) {
-      const char* menuText = "Fight Run";
-      textManager->setText(menuText);
-      textManager->display(renderer, 0, 0); // Window size not needed
+      std::string menuText = "Fight Run";
+      textManager->setText(menuText.c_str());
+      textManager->display(renderer, logicalWidth, logicalHeight, getOption()); // Window size not needed
    }
 
    if (isEditorMode) {
-      level->renderGrid(renderer,camera.getX(),camera.getY());
+      level->renderGrid(renderer, camera.getX(), camera.getY());
    }
 
    if (showCollisionText) {
-      const char* testText = "This game is a work in progress. Please be patient with me.";
-      textManager->setText(testText);
-      textManager->display(renderer, 0, 0); // Window size not needed
+     std::string testText = "This game is a work in progress. Please be patient with me.";
+      textManager->setText(testText.c_str());
+      textManager->display(renderer, logicalWidth, logicalHeight, getOption()); // Window size not needed
    }
 
    SDL_RenderPresent(renderer);
@@ -345,13 +336,3 @@ std::tuple<int, int> Game::getWindowSize() const {
    }
    return std::make_tuple(width, height);
 }
-
-//void Game::clampPlayerPosition(Entity* player) {
-//   if (!player) return;
-//   Position pos = player->getPosition();
-//   float width = player->getRect().w;
-//   float height = player->getRect().h;
-//   pos.setX(std::max(0.0f + width / 2, std::min(pos.getX(), WORLD_WIDTH - width / 2)));
-//   pos.setY(std::max(0.0f + height / 2, std::min(pos.getY(), WORLD_HEIGHT - height / 2)));
-//   player->setPosition(pos.getX(), pos.getY());
-//}
