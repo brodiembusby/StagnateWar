@@ -45,11 +45,13 @@ void Game::gameQuit() {
    delete assetFactory;
    delete textManager;
 
+
    if (level) {
       delete level;
       level = nullptr;
    }
 
+    
    if (renderer) {
       SDL_DestroyRenderer(renderer);
       renderer = nullptr;
@@ -261,9 +263,17 @@ SDL_AppResult Game::gameIterate() {
       level->renderTiles(renderer, 0, 0); // No camera offset needed due to viewport
    }
 
+
+   //SDL_RenderTextureRotated()
+
    // Render entities
    for (Entity* entity : entities) {
       SpriteSheet* ss = entity->getSpriteSheet();
+      
+      //if (entity->getDirection() == (int)entity->Direction::LEFT) {
+      //   ss = entity->setSpriteSheet();
+      //}
+      
       if (ss) {
          int spriteRow = (entity == assetFactory->getEntity("player")) ? 1 : 2;
          ss->selectCurrentSprite(spriteRow, 0);

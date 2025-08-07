@@ -30,6 +30,13 @@ private:
          auto it = entities.find(name);
          return (it != entities.end()) ? it->second : nullptr;
       }
+      void removeEntity(const std::string& name) {
+         auto it = entities.find(name);
+         if (it != entities.end()) {
+            delete it->second;
+            entities.erase(it);
+         }
+      }
    };
 
    struct TextureManager {
@@ -47,6 +54,13 @@ private:
          auto it = textures.find(name);
          return (it != textures.end()) ? it->second : nullptr;
       }
+      void removeTexture(const std::string& name) {
+         auto it = textures.find(name);
+         if (it != textures.end()) {
+            SDL_DestroyTexture(it->second);
+            textures.erase(it);
+         }
+      }
    };
 
    TextureManager textureManager;
@@ -56,17 +70,20 @@ private:
   
    std::unordered_map<std::string, EntityData> entities;
    std::unordered_map<std::string, std::string> texturePaths = {
-       {"ArmySpriteSheet", "assets/ArmySpriteSheet.png"},
+       {"PlayerSpriteSheet", "assets/player.png"},
+      {"ArmySpriteSheet", "assets/ArmySpriteSheet.png"},
        {"TileSpriteSheet", "assets/TileSpriteSheet.png"},
        {"defaultIcon", "assets/defaultIcon.png"},
-       {"default", "assets/default.png"}
+       {"default", "assets/default.png"},
+      {"playerWalk", "assets/sWalk.png"},
+        
    };
 
 public:
    AssetFactory(SDL_Renderer* r)
       : renderer(r),
         entities{
-          {"player", {"player", Position(100.0f, 100.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}},
+          {"player", {"player", Position(100.0f, 100.0f), "PlayerSpriteSheet", spriteSheetRC, spriteSheetRC}},
           {"enemy", {"enemy", Position(200.0f, 200.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}},
           {"tile", {"tile", Position(0.0f, 0.0f), "TileSpriteSheet", spriteSheetRC, spriteSheetRC}}
         }
