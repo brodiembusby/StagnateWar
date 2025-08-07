@@ -263,14 +263,14 @@ SDL_AppResult Game::gameIterate() {
 
    // Render entities
    for (Entity* entity : entities) {
-      SpriteSheet* spriteSheet = entity->getSpriteSheet();
-      if (spriteSheet) {
+      SpriteSheet* ss = entity->getSpriteSheet();
+      if (ss) {
          int spriteRow = (entity == assetFactory->getEntity("player")) ? 1 : 2;
-         spriteSheet->selectCurrentSprite(spriteRow, 0);
+         ss->selectCurrentSprite(spriteRow, 0);
          SDL_FRect destRect = entity->getRect();
          destRect.x -= camera.getX(); // Apply camera offset
          destRect.y -= camera.getY();
-         spriteSheet->drawSprite(renderer, destRect);
+         ss->drawSprite(renderer, destRect);
       }
       else {
          SDL_Log("Entity has no sprite sheet");
