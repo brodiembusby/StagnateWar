@@ -16,5 +16,6 @@ public:
 private:
    TTF_Font* font;
    SDL_Texture* textTexture;
+   //SDL_Rect textRect;
    const char* text;
 };

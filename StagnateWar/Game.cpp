@@ -85,7 +85,10 @@ SDL_AppResult Game::gameInit() {
       SDL_Quit();
       return SDL_APP_FAILURE;
    }
-
+   if (!SDL_SetRenderLogicalPresentation(renderer, defaultWindowWidth, defaultWindowHeight, SDL_LOGICAL_PRESENTATION_LETTERBOX)) {
+      SDL_Log("Failed to set logical presentation: %s", SDL_GetError());
+      return SDL_APP_FAILURE;
+   }
    // TTF Text Library
    if (!TTF_Init()) {
       SDL_Log("Couldnt initalize TTF: %s", SDL_GetError());
@@ -93,11 +96,12 @@ SDL_AppResult Game::gameInit() {
 
    }
 
-   int windowWidth, windowHeight;
-   std::tuple<int, int> winSize = getWindowSize();
-   windowWidth = std::get<0>(winSize);
-   windowHeight = std::get<1>(winSize);
-   float fontSize = windowHeight * 0.15f;
+   //int windowWidth, windowHeight;
+   //std::tuple<int, int> winSize = getWindowSize();
+   //windowWidth = std::get<0>(winSize);
+   //windowHeight = std::get<1>(winSize);
+   //float fontSize = windowHeight * 0.15f;
+   float fontSize = 480 * 0.15f; // Base font size on logical height
    fontSize = std::max(12.0f, std::min(fontSize, 58.0f));
    const char* file = "assets/CourierPrime-Regular.ttf";
 
@@ -160,16 +164,15 @@ SDL_AppResult Game::gameInit() {
    }
 
    // Set initial entity sizes and positions
-   float scaleFactor = windowHeight / 480.0f;
-   float entityWidth = 32.0f * scaleFactor;
-   float entityHeight = 32.0f * scaleFactor;
+   float entityWidth = 32.0f;
+   float entityHeight = 32.0f;
    for (Entity* entity : entities) {
       entity->setSize(entityWidth, entityHeight);
       if (entity == player) {
-         entity->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
+         entity->setPosition(100.0f, 100.0f);
       }
       else if (entity == enemy) {
-         entity->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
+         entity->setPosition(200.0f, 200.0f);
       }
    }
 
@@ -180,18 +183,16 @@ SDL_AppResult Game::gameInit() {
 
 void Game::handleEvent(SDL_Event& event) {
 
+   // Convert event coordinates to logical render coordinates
+   if (!SDL_ConvertEventToRenderCoordinates(renderer, &event)) {
+      SDL_Log("Failed to convert event coordinates: %s", SDL_GetError());
+   }
+
    if (event.type == SDL_EVENT_KEY_DOWN) {
       switch (event.key.scancode) {
       case SDL_SCANCODE_E:
-         if (!isEditorMode) {
-            isEditorMode = true;
-            SDL_Log("Entering Editor Mode");
-         }
-         else {
-            isEditorMode = false;
-            SDL_Log("Exiting Editor Mode");
-
-         }
+         isEditorMode = !isEditorMode;
+         SDL_Log(isEditorMode ? "Entering Editor Mode" : "Exiting Editor Mode");
          break;
          // Toggle fullscreen with F11
       case SDL_SCANCODE_F11:
@@ -203,20 +204,14 @@ void Game::handleEvent(SDL_Event& event) {
          }
          break;
       case SDL_SCANCODE_Q:
-         if (!isMenuing) {
-            SDL_Log("Entering Menu Mode");
-            isMenuing = true;
-         }
-         else {
-            SDL_Log("Exiting Menu Mode");
-            isMenuing = false;
-         }
+         isMenuing = !isMenuing;
+         SDL_Log(isMenuing ? "Entering Menu Mode" : "Exiting Menu Mode");
+         break;
       default:
          break;
       }
-
    }
-   if(isMenuing) {
+   if (isMenuing) {
       textManager->menuEvent(event);
    }
    // Editor mode handling
@@ -249,25 +244,18 @@ void Game::handleEvent(SDL_Event& event) {
    else {
       showCollisionText = false;
    }
-   if(!isMenuing && !isEditorMode) {
-      if (player) {
-         player->playerEvent(event, player);
-      }
+   if (!isMenuing && !isEditorMode && player) {
+
+      player->playerEvent(event, player);
+
    }
 
 
 }
-
-
 SDL_AppResult Game::gameIterate() {
    Uint64 currentTick = SDL_GetTicks();
    deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
-
-   int windowWidth, windowHeight;
-   std::tuple<int, int> winSize = getWindowSize();
-   windowWidth = std::get<0>(winSize);
-   windowHeight = std::get<1>(winSize);
 
    // Update camera to follow player
    Entity* player = findEntity("player");
@@ -279,8 +267,7 @@ SDL_AppResult Game::gameIterate() {
    SDL_RenderClear(renderer);
 
    if (level) {
-      level->renderTiles(renderer, camera.getX(), camera.getY());
-
+      level->renderTiles(renderer, 0, 0); // No camera offset needed due to viewport
    }
 
    // Render entities
@@ -290,7 +277,7 @@ SDL_AppResult Game::gameIterate() {
          int spriteRow = (entity == assetFactory->getEntity("player")) ? 1 : 2;
          spriteSheet->selectCurrentSprite(spriteRow, 0);
          SDL_FRect destRect = entity->getRect();
-         destRect.x -= camera.getX();
+         destRect.x -= camera.getX(); // Apply camera offset
          destRect.y -= camera.getY();
          spriteSheet->drawSprite(renderer, destRect);
       }
@@ -299,36 +286,45 @@ SDL_AppResult Game::gameIterate() {
       }
    }
 
+   if (isMenuing) {
+      const char* menuText = "Fight Run";
+      textManager->setText(menuText);
+      textManager->display(renderer, 0, 0); // Window size not needed
+   }
+
    if (isEditorMode) {
-      level->renderGrid(renderer);
+      level->renderGrid(renderer,camera.getX(),camera.getY());
    }
 
    if (showCollisionText) {
-      const char* testText = "This game is a work in progress. PLease be patient with me.";
+      const char* testText = "This game is a work in progress. Please be patient with me.";
       textManager->setText(testText);
-      textManager->display(renderer, windowWidth, windowHeight);
+      textManager->display(renderer, 0, 0); // Window size not needed
    }
 
    SDL_RenderPresent(renderer);
    return SDL_APP_SUCCESS;
 }
-
 void Game::updateCamera(Position& target) {
+   int logicalWidth, logicalHeight;
+   SDL_RendererLogicalPresentation mode;
+   if (!SDL_GetRenderLogicalPresentation(renderer, &logicalWidth, &logicalHeight, &mode)) {
+      SDL_Log("Failed to get logical presentation: %s", SDL_GetError());
+      logicalWidth = 640;
+      logicalHeight = 480;
+   }
 
-   int windowWidth, windowHeight;
-   std::tuple<int, int> winSize = getWindowSize();
-   windowWidth = std::get<0>(winSize);
-   windowHeight = std::get<1>(winSize);
+   // Center the camera on the target (player) in logical coordinates
+   float cameraX = target.getX() - logicalWidth / 2.0f;
+   float cameraY = target.getY() - logicalHeight / 2.0f;
 
-   // Center the camera on the target (player)
-   float cameraX = target.getX() - windowWidth / 2.0f;
-   float cameraY = target.getY() - windowHeight / 2.0f;
-
-   cameraX = std::max(0.0f, std::min(cameraX, WORLD_WIDTH - windowWidth));
-   cameraY = std::max(0.0f, std::min(cameraY, WORLD_HEIGHT - windowHeight));
+   // Clamp camera to world bounds
+   cameraX = std::max(0.0f, std::min(cameraX, WORLD_WIDTH - logicalWidth));
+   cameraY = std::max(0.0f, std::min(cameraY, WORLD_HEIGHT - logicalHeight));
 
    camera.setX(cameraX);
    camera.setY(cameraY);
+
 }
 
 Entity* Game::findEntity(const std::string& name) {
@@ -349,3 +345,13 @@ std::tuple<int, int> Game::getWindowSize() const {
    }
    return std::make_tuple(width, height);
 }
+
+//void Game::clampPlayerPosition(Entity* player) {
+//   if (!player) return;
+//   Position pos = player->getPosition();
+//   float width = player->getRect().w;
+//   float height = player->getRect().h;
+//   pos.setX(std::max(0.0f + width / 2, std::min(pos.getX(), WORLD_WIDTH - width / 2)));
+//   pos.setY(std::max(0.0f + height / 2, std::min(pos.getY(), WORLD_HEIGHT - height / 2)));
+//   player->setPosition(pos.getX(), pos.getY());
+//}

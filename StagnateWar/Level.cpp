@@ -1,43 +1,39 @@
 #include "Level.h"
 
 // Sets a default tiles set in the background
-//Level::Level(AssetFactory* af) : assetFactory(af) {
-//   for (int x = 0; x < WIDTH; x++) {
-//      for (int y = 0; y < HEIGHT; y++) {
-//         level[x][y] = nullptr;
-//         if (assetFactory) {
-//            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile"));
-//            if (level[x][y]) {
-//               Tile* tile = level[x][y];
-//               tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
-//               tile->setIsWalkable(true); // Default to walkable (floor)
-//               tile->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-//               if (tileSpriteSheet) {
-//                  tile->setSpriteSheet(tileSpriteSheet);
-//                  //tile->getSpriteSheet()->selectCurrentSprite(0, 4); // Default sprite
-//               }
-//            }
-//            else {
-//               SDL_Log("Failed to create tile at (%d, %d)", x, y);
-//               level[x][y] = new Tile(); // Fallback
-//               level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
-//               level[x][y]->setIsWalkable(true);
-//               level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-//            }
-//         }
-//         else {
-//            level[x][y] = new Tile(); // Fallback if no assetFactory
-//            level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
-//            level[x][y]->setIsWalkable(true);
-//            level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-//         }
-//      }
-//   }
-//}
+Level::Level(AssetFactory* af) : assetFactory(af) {
+   for (int x = 0; x < WIDTH; x++) {
+      for (int y = 0; y < HEIGHT; y++) {
+         level[x][y] = nullptr;
+         if (assetFactory) {
+            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile"));
+            if (level[x][y]) {
+               Tile* tile = level[x][y];
+               tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+               tile->setIsWalkable(true); 
+               tile->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+               tile->getSpriteSheet()->selectCurrentSprite(0, 4); // Default grass no edges
+            }
+            else {
+               SDL_Log("Failed to create tile at (%d, %d)", x, y);
+               level[x][y] = new Tile(); // Fallback
+               level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+               level[x][y]->setIsWalkable(true);
+               level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+            }
+         }
+         else {
+            level[x][y] = new Tile(); // Fallback if no assetFactory
+            level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+            level[x][y]->setIsWalkable(true);
+            level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+         }
+      }
+   }
+}
 
 void Level::editorEvent(SDL_Event& event) {
-   // Handle events related to the fight menu here
-   // This is a placeholder for future functionality
+
    if (event.type == SDL_EVENT_KEY_DOWN) {
       switch (event.key.scancode) {
       case SDL_SCANCODE_M:
@@ -49,6 +45,7 @@ void Level::editorEvent(SDL_Event& event) {
       }
    }
 }
+
 // Render the tiles in the level, adjusting for camera position.
 void Level::renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY) {
    for (int y = 0; y < HEIGHT; y++) {
@@ -65,20 +62,17 @@ void Level::renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY) {
       }
    }
 }
+
 // Render the grid lines for the level.
-void Level::renderGrid(SDL_Renderer* renderer) {
-   // Render grid first 2000 / 50 = 40  (40,40)
-   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Gray grid lines
+void Level::renderGrid(SDL_Renderer* renderer, float cameraX, float cameraY) {
+  
+   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); 
 
-   for (int x = 0; x < 40; x++) {
-
-      SDL_RenderLine(renderer, x * DEFAULT_WIDTH, 0, x * DEFAULT_WIDTH, WORLD_HEIGHT);
-
+   for (float x = 0; x <= WORLD_WIDTH; x += DEFAULT_WIDTH) {
+      SDL_RenderLine(renderer, x - cameraX, 0 - cameraY, x - cameraX, WORLD_HEIGHT - cameraY);
    }
-   for (int y = 0; y < 40; y++) {
-
-      SDL_RenderLine(renderer, 0, y * DEFAULT_HEIGHT, WORLD_WIDTH, y * DEFAULT_HEIGHT);
-
+   for (float y = 0; y <= WORLD_HEIGHT; y += DEFAULT_HEIGHT) {
+      SDL_RenderLine(renderer, 0 - cameraX, y - cameraY, WORLD_WIDTH - cameraX, y - cameraY);
    }
 
 }
@@ -139,8 +133,8 @@ void Level::saveToFile(const std::string& filename) {
          tileJson["y"] = y;
          tileJson["isWalkable"] = tile ? tile->getIsWalkable() : true;
          if (tile && tile->getSpriteSheet()) {
-            tileJson["selectedTileX"] = tile->getSpriteSheet()->getSpriteIndexX();
-            tileJson["selectedTileY"] = tile->getSpriteSheet()->getSpriteIndexY();
+            tileJson["selectedTileX"] = tile->getSpriteSheet()->getClip().x;
+            tileJson["selectedTileY"] = tile->getSpriteSheet()->getClip().y;
          }
          else {
             tileJson["selectedTileX"] = 0; // Default sprite index
@@ -196,7 +190,7 @@ void Level::loadFromFile(const std::string& filename) {
                tile->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
                if (tileSpriteSheet) {
                   tile->setSpriteSheet(tileSpriteSheet);
-                  //tile->getSpriteSheet()->selectCurrentSprite(selectedTileX, selectedTileY); // Use selectSprite
+                  tile->getSpriteSheet()->selectCurrentSprite(selectedTileX, selectedTileY); // Use selectSprite
                }
             }
             else {

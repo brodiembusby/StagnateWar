@@ -11,13 +11,19 @@ TextManager::~TextManager() {
    // Note: Do not destroy the font here, as it's managed by the Game class
 }
 
-void TextManager::display(SDL_Renderer* renderer, int window_width, int window_height) {
+void TextManager::display(SDL_Renderer* renderer, int, int) {
+   int logicalWidth, logicalHeight;
+   SDL_RendererLogicalPresentation mode;
+   if (!SDL_GetRenderLogicalPresentation(renderer, &logicalWidth, &logicalHeight, &mode)) {
+      SDL_Log("Failed to get logical presentation: %s", SDL_GetError());
+      return;
+   }
 
-   float gui_height = window_height / 3.0f;
-   float gui_y = window_height - gui_height;
+   float gui_height = logicalHeight / 3.0f;
+   float gui_y = logicalHeight - gui_height;
 
    // Draw GUI backdrop
-   SDL_FRect GUIBackdrop = { 0.0f, gui_y, window_width, gui_height };
+   SDL_FRect GUIBackdrop = { 0.0f, gui_y, static_cast<float>(logicalWidth), gui_height };
    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue backdrop
    SDL_RenderFillRect(renderer, &GUIBackdrop);
 
@@ -30,7 +36,7 @@ void TextManager::display(SDL_Renderer* renderer, int window_width, int window_h
    SDL_Color textColor = { 255, 255, 255, 255 };
 
    // Render text to a surface using TTF_RenderText_Solid_Wrapped
-   SDL_Surface* textSurface = TTF_RenderText_Solid_Wrapped(font, getText(), 0, textColor, window_width - 20);
+   SDL_Surface* textSurface = TTF_RenderText_Solid_Wrapped(font, getText(), 0, textColor, logicalWidth - 20);
    if (!textSurface) {
       SDL_Log("Failed to render text: %s", SDL_GetError());
       return;
@@ -44,12 +50,12 @@ void TextManager::display(SDL_Renderer* renderer, int window_width, int window_h
       return;
    }
 
-   // Define destination rectangle for text with padding, anchored relative to GUI backdrop
-   float text_padding = 10.0f; // Padding from edges of the backdrop
+   // Define destination rectangle for text with padding
+   float text_padding = 10.0f;
    SDL_FRect textRect = {
        text_padding,
        gui_y + text_padding,
-       static_cast<float>(window_width) - 2 * text_padding,
+       static_cast<float>(logicalWidth) - 2 * text_padding,
        gui_height - 2 * text_padding
    };
 
@@ -58,43 +64,35 @@ void TextManager::display(SDL_Renderer* renderer, int window_width, int window_h
       SDL_Log("Failed to render text texture: %s", SDL_GetError());
    }
 
+   // Draw a line under the text in logical coordinates (as a UI element)
+   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White line
+   SDL_RenderLine(renderer, 0, gui_y, logicalWidth, gui_y);
+
    // Clean up texture
    SDL_DestroyTexture(textTexture);
    textTexture = nullptr;
 }
 
+// If we are in here then we are in the menu
 void TextManager::menuEvent(SDL_Event& event) {
-   
+
+
+
    if (event.type == SDL_EVENT_KEY_DOWN) {
       switch (event.key.scancode)
       {
-      case SDL_SCANCODE_W:
-         SDL_Log("W Pressed");
-         break;
-      case SDL_SCANCODE_S:
-         SDL_Log("W Pressed");
-
-         break;
       case SDL_SCANCODE_A:
-         SDL_Log("W Pressed");
-
+         SDL_Log("A Pressed");
          break;
       case SDL_SCANCODE_D:
-         SDL_Log("W Pressed");
-
+         SDL_Log("D Pressed");
          break;
-      case SDL_SCANCODE_P:
-         SDL_Log("p Pressed");
-
+      case SDL_SCANCODE_SPACE:
+         SDL_Log("Space Pressed");
          break;
-
 
       default:
          break;
-      }
-
-      if (event.key.scancode == SDL_SCANCODE_ESCAPE) {
-         SDL_Log("Fight menu closed");
       }
    }
 }
