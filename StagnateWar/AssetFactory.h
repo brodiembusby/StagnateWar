@@ -10,11 +10,10 @@ class AssetFactory
 {
 private:
    struct EntityData {
-      std::string type;
-      Position position;
+      std::string entityName;
       std::string textureName;
-      int rows;
-      int columns;
+      int ssrows;
+      int sscolumns;
    };
 
    struct EntityManager {
@@ -66,31 +65,34 @@ private:
    TextureManager textureManager;
    EntityManager entityManager;
    SDL_Renderer* renderer;
-   int spriteSheetRC = 9;
-  
+   
+
    std::unordered_map<std::string, EntityData> entities;
    std::unordered_map<std::string, std::string> texturePaths = {
        {"PlayerSpriteSheet", "assets/player.png"},
-      {"ArmySpriteSheet", "assets/ArmySpriteSheet.png"},
+       {"badSoliderMAX", "assets/badSoliderMAX.png"},
        {"TileSpriteSheet", "assets/TileSpriteSheet.png"},
        {"defaultIcon", "assets/defaultIcon.png"},
        {"default", "assets/default.png"},
       {"playerWalk", "assets/sWalk.png"},
-        
+
    };
 
 public:
    AssetFactory(SDL_Renderer* r)
       : renderer(r),
-        entities{
-          {"player", {"player", Position(100.0f, 100.0f), "PlayerSpriteSheet", spriteSheetRC, spriteSheetRC}},
-          {"enemy", {"enemy", Position(200.0f, 200.0f), "ArmySpriteSheet", spriteSheetRC, spriteSheetRC}},
-          {"tile", {"tile", Position(0.0f, 0.0f), "TileSpriteSheet", spriteSheetRC, spriteSheetRC}}
-        }
+      entities{
+        {"player", {"player", "PlayerSpriteSheet", 1, 12}},
+        {"enemy", {"enemy",  "badSoliderMAX", 1, 12}},
+        {"tile", {"tile",  "TileSpriteSheet", 9, 9}},
+      }
    {
    }
 
    SDL_Texture* loadTexture(const std::string& name);
-   Entity* createEntity(const std::string& name);
-   Entity* getEntity(const std::string& name) { return entityManager.getEntity(name); }
+   Entity* createEntity(const std::string& name, Position pos);
+   Entity* getEntity(const std::string type) { return entityManager.getEntity(type); }
 };
+
+
+

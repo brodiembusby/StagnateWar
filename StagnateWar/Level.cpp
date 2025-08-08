@@ -6,7 +6,7 @@ Level::Level(AssetFactory* af) : assetFactory(af) {
       for (int y = 0; y < HEIGHT; y++) {
          level[x][y] = nullptr;
          if (assetFactory) {
-            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile"));
+            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile", (x, y)));
             if (level[x][y]) {
                Tile* tile = level[x][y];
                tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
@@ -102,7 +102,7 @@ void Level::updateTile(SDL_Event& event, float cameraX, float cameraY) {
          }
 
          // Create a new tile entity using the asset factory
-         level[gridX][gridY] = dynamic_cast<Tile*>(assetFactory->createEntity("tile"));
+         level[gridX][gridY] = dynamic_cast<Tile*>(assetFactory->createEntity("tile", (gridX,gridY)));
          if (level[gridX][gridY]) {
             Tile* tile = level[gridX][gridY];
             tile->setPosition(gridX * DEFAULT_WIDTH, gridY * DEFAULT_HEIGHT);
@@ -182,7 +182,7 @@ void Level::loadFromFile(const std::string& filename) {
          int selectedTileY = tileJson.value("selectedTileY", 4); // Default to 4 if missing
 
          if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && assetFactory) {
-            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile"));
+            level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile", (x, y)));
             if (level[x][y]) {
                Tile* tile = level[x][y];
                tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);

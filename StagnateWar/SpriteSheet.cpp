@@ -23,3 +23,8 @@ void SpriteSheet::drawSprite(SDL_Renderer* renderer, SDL_FRect& rect){
 
    SDL_RenderTexture(renderer, texture, &clip, &rect);
 }
+
+void SpriteSheet::drawSpriteRotated(SDL_Renderer* renderer,SDL_Texture* texture, SDL_FRect& rect, SDL_FlipMode flip) {
+  
+   SDL_RenderTextureRotated(renderer, texture, &clip, &rect, 0.0f, nullptr, flip);
+}

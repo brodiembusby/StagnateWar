@@ -2,6 +2,15 @@
 #include "TextManager.h"
 #define WORLD_WIDTH 2048.0f
 #define WORLD_HEIGHT 2048.0f
+
+
+void const cameraOffset(SDL_FRect& destRect, float cameraX, float cameraY) {
+
+   destRect.x -= cameraX; // Apply camera offset
+   destRect.y -= cameraY;
+
+}
+
 Game::Game() {}
 
 Game::~Game() {
@@ -142,7 +151,7 @@ SDL_AppResult Game::gameInit() {
    }
 
    // Create and store entities
-   Entity* player = assetFactory->createEntity("player");
+   Entity* player = assetFactory->createEntity("player", (100, 100));
    if (player) {
       entities.push_back(player);
    }
@@ -151,7 +160,7 @@ SDL_AppResult Game::gameInit() {
       return SDL_APP_FAILURE;
    }
 
-   Entity* enemy = assetFactory->createEntity("enemy");
+   Entity* enemy = assetFactory->createEntity("enemy", (200,  100));
    if (enemy) {
       entities.push_back(enemy);
    }
@@ -245,52 +254,56 @@ SDL_AppResult Game::gameIterate() {
       return SDL_APP_FAILURE;
    }
 
-   
    Uint64 currentTick = SDL_GetTicks();
    deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
 
    // Update camera to follow player
    Entity* player = findEntity("player");
-   if (player) {
+   if (player ) {
+      if (player->getIsMoving()) {
+         player->updateAnimation(deltaTime); // Update player animation
+
+      }
       updateCamera(player->getPosition());
    }
+
+   // Update enemy (if needed)
+   //Entity* enemy = findEntity("enemy");
+   //if (enemy) {
+   //   enemy->updateAnimation(deltaTime); // Update enemy animation (if it animates)
+   //}
 
    SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
    SDL_RenderClear(renderer);
 
    if (level) {
-      level->renderTiles(renderer, 0, 0); // No camera offset needed due to viewport
+      level->renderTiles(renderer, 0, 0);
    }
-
-
-   //SDL_RenderTextureRotated()
 
    // Render entities
    for (Entity* entity : entities) {
       SpriteSheet* ss = entity->getSpriteSheet();
-      
-      //if (entity->getDirection() == (int)entity->Direction::LEFT) {
-      //   ss = entity->setSpriteSheet();
-      //}
-      
-      if (ss) {
-         int spriteRow = (entity == assetFactory->getEntity("player")) ? 1 : 2;
-         ss->selectCurrentSprite(spriteRow, 0);
-         SDL_FRect destRect = entity->getRect();
-         destRect.x -= camera.getX(); // Apply camera offset
-         destRect.y -= camera.getY();
+      if (!ss) {
+         SDL_Log("Entity has no sprite sheet");
+         continue;
+      }
+
+      SDL_FRect destRect = entity->getRect();
+      cameraOffset(destRect, camera.getX(), camera.getY());
+      if (entity->getIsMoving() && entity->getDirection() != (int)Entity::Direction::LEFT) {
          ss->drawSprite(renderer, destRect);
+
       }
       else {
-         SDL_Log("Entity has no sprite sheet");
+         ss->drawSpriteRotated(renderer, ss->getTexture(), destRect, entity->getDirection() == (int)Entity::Direction::LEFT ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
       }
    }
 
    if (isMenuing) {
       std::string menuText = "Fight Run";
       textManager->setText(menuText.c_str());
-      textManager->display(renderer, logicalWidth, logicalHeight, getOption()); // Window size not needed
+      textManager->display(renderer, logicalWidth, logicalHeight, getOption());
    }
 
    if (isEditorMode) {
@@ -298,9 +311,9 @@ SDL_AppResult Game::gameIterate() {
    }
 
    if (showCollisionText) {
-     std::string testText = "This game is a work in progress. Please be patient with me.";
+      std::string testText = "This game is a work in progress. Please be patient with me.";
       textManager->setText(testText.c_str());
-      textManager->display(renderer, logicalWidth, logicalHeight, getOption()); // Window size not needed
+      textManager->display(renderer, logicalWidth, logicalHeight, getOption());
    }
 
    SDL_RenderPresent(renderer);
