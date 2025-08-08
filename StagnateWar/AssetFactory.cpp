@@ -2,7 +2,7 @@
 #include "Tile.h"
 
 
-Entity* AssetFactory::createEntity(const std::string& name) {
+Entity* AssetFactory::createEntity(const std::string& name, Position pos) {
    // Look up entity data by name
    auto it = entities.find(name);
    if (it == entities.end()) {
@@ -12,22 +12,24 @@ Entity* AssetFactory::createEntity(const std::string& name) {
    EntityData& data = it->second;
    // Create entity based on type (PartyMember for player/enemy, Tile for tile)
    Entity* entity = nullptr;
-   if (data.type == "player" || data.type == "enemy") {
+
+
+   if (data.entityName == "player" || data.entityName == "enemy") {
       entity = new PartyMember();
    }
-   else if (data.type == "tile") {
+   else if (data.entityName == "tile") {
       entity = new Tile();
    }
    else {
-      SDL_Log("Unknown entity type: %s", data.type.c_str());
+      SDL_Log("Unknown entity entityName: %s", data.entityName.c_str());
       return nullptr;
    }
    // Set position and load texture, create sprite sheet
    if (entity) {
-      entity->setPosition(data.position.getX(), data.position.getY());
+      entity->setPosition(pos.getX(), pos.getY());
       SDL_Texture* texture = loadTexture(data.textureName);
       if (texture) {
-         SpriteSheet* spriteSheet = new SpriteSheet(texture, data.rows, data.columns);
+         SpriteSheet* spriteSheet = new SpriteSheet(texture, data.ssrows, data.sscolumns);
          entity->setSpriteSheet(spriteSheet);
       }
       else {

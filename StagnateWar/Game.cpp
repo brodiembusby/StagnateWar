@@ -2,6 +2,15 @@
 #include "TextManager.h"
 #define WORLD_WIDTH 2048.0f
 #define WORLD_HEIGHT 2048.0f
+
+
+void const cameraOffset(SDL_FRect& destRect, float cameraX, float cameraY) {
+
+   destRect.x -= cameraX; // Apply camera offset
+   destRect.y -= cameraY;
+
+}
+
 Game::Game() {}
 
 Game::~Game() {
@@ -45,11 +54,13 @@ void Game::gameQuit() {
    delete assetFactory;
    delete textManager;
 
+
    if (level) {
       delete level;
       level = nullptr;
    }
 
+    
    if (renderer) {
       SDL_DestroyRenderer(renderer);
       renderer = nullptr;
@@ -85,7 +96,10 @@ SDL_AppResult Game::gameInit() {
       SDL_Quit();
       return SDL_APP_FAILURE;
    }
-
+   if (!SDL_SetRenderLogicalPresentation(renderer, defaultWindowWidth, defaultWindowHeight, SDL_LOGICAL_PRESENTATION_LETTERBOX)) {
+      SDL_Log("Failed to set logical presentation: %s", SDL_GetError());
+      return SDL_APP_FAILURE;
+   }
    // TTF Text Library
    if (!TTF_Init()) {
       SDL_Log("Couldnt initalize TTF: %s", SDL_GetError());
@@ -93,15 +107,11 @@ SDL_AppResult Game::gameInit() {
 
    }
 
-   int windowWidth, windowHeight;
-   std::tuple<int, int> winSize = getWindowSize();
-   windowWidth = std::get<0>(winSize);
-   windowHeight = std::get<1>(winSize);
-   float fontSize = windowHeight * 0.15f;
+   float fontSize = 480 * 0.15f; // Base font size on logical height
    fontSize = std::max(12.0f, std::min(fontSize, 58.0f));
-   const char* file = "assets/CourierPrime-Regular.ttf";
+  std::string file = "assets/CourierPrime-Regular.ttf";
 
-   font = TTF_OpenFont(file, fontSize);
+   font = TTF_OpenFont(file.c_str(), fontSize);
    if (!font) {
       SDL_Log("Couldnt open TTF font file: %s", SDL_GetError());
       return SDL_APP_FAILURE;
@@ -141,7 +151,7 @@ SDL_AppResult Game::gameInit() {
    }
 
    // Create and store entities
-   Entity* player = assetFactory->createEntity("player");
+   Entity* player = assetFactory->createEntity("player", (100, 100));
    if (player) {
       entities.push_back(player);
    }
@@ -150,7 +160,7 @@ SDL_AppResult Game::gameInit() {
       return SDL_APP_FAILURE;
    }
 
-   Entity* enemy = assetFactory->createEntity("enemy");
+   Entity* enemy = assetFactory->createEntity("enemy", (200,  100));
    if (enemy) {
       entities.push_back(enemy);
    }
@@ -160,16 +170,15 @@ SDL_AppResult Game::gameInit() {
    }
 
    // Set initial entity sizes and positions
-   float scaleFactor = windowHeight / 480.0f;
-   float entityWidth = 32.0f * scaleFactor;
-   float entityHeight = 32.0f * scaleFactor;
+   float entityWidth = 32.0f;
+   float entityHeight = 32.0f;
    for (Entity* entity : entities) {
       entity->setSize(entityWidth, entityHeight);
       if (entity == player) {
-         entity->setPosition(100.0f * scaleFactor, 100.0f * scaleFactor);
+         entity->setPosition(100.0f, 100.0f);
       }
       else if (entity == enemy) {
-         entity->setPosition(200.0f * scaleFactor, 200.0f * scaleFactor);
+         entity->setPosition(200.0f, 200.0f);
       }
    }
 
@@ -180,18 +189,16 @@ SDL_AppResult Game::gameInit() {
 
 void Game::handleEvent(SDL_Event& event) {
 
+   // Convert event coordinates to logical render coordinates
+   if (!SDL_ConvertEventToRenderCoordinates(renderer, &event)) {
+      SDL_Log("Failed to convert event coordinates: %s", SDL_GetError());
+   }
+
    if (event.type == SDL_EVENT_KEY_DOWN) {
       switch (event.key.scancode) {
       case SDL_SCANCODE_E:
-         if (!isEditorMode) {
-            isEditorMode = true;
-            SDL_Log("Entering Editor Mode");
-         }
-         else {
-            isEditorMode = false;
-            SDL_Log("Exiting Editor Mode");
-
-         }
+         isEditorMode = !isEditorMode;
+         SDL_Log(isEditorMode ? "Entering Editor Mode" : "Exiting Editor Mode");
          break;
          // Toggle fullscreen with F11
       case SDL_SCANCODE_F11:
@@ -203,43 +210,25 @@ void Game::handleEvent(SDL_Event& event) {
          }
          break;
       case SDL_SCANCODE_Q:
-         if (!isMenuing) {
-            SDL_Log("Entering Menu Mode");
-            isMenuing = true;
-         }
-         else {
-            SDL_Log("Exiting Menu Mode");
-            isMenuing = false;
-         }
+         isMenuing = !isMenuing;
+         SDL_Log(isMenuing ? "Entering Menu Mode" : "Exiting Menu Mode");
+         break;
       default:
          break;
       }
-
    }
-   if(isMenuing) {
-      textManager->menuEvent(event);
+   if (isMenuing) {
+      std::string menu = textManager->menuEvent(event);
+      setOption(menu);
+      if (menu != "") {
+         isMenuing = false; // Exit menu after selection
+      }
    }
    // Editor mode handling
    if (isEditorMode && level) {
       level->editorEvent(event);
       level->updateTile(event, camera.getX(), camera.getY());
    }
-
-   //// TODO: Need to Fix this sorta works but not really
-   //// Update entity sizes on window resize
-   //int windowWidth, windowHeight;
-   //std::tuple<int, int> winSize = getWindowSize();
-   //windowWidth = std::get<0>(winSize);
-   //windowHeight = std::get<1>(winSize);
-   //float scaleFactor = windowHeight / 480.0f;
-   //if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-   //   float entityWidth = 32.0f * scaleFactor;
-   //   float entityHeight = 32.0f * scaleFactor;
-   //   for (Entity* entity : entities) {
-   //      entity->setSize(entityWidth, entityHeight);
-   //   }
-   //}
-
 
    Entity* player = findEntity("player");
    Entity* enemy = findEntity("enemy");
@@ -249,86 +238,107 @@ void Game::handleEvent(SDL_Event& event) {
    else {
       showCollisionText = false;
    }
-   if(!isMenuing && !isEditorMode) {
-      if (player) {
-         player->playerEvent(event, player);
-      }
+   if (!isMenuing && !isEditorMode && player) {
+
+      player->playerEvent(event, player);
+
    }
 
 
 }
-
-
 SDL_AppResult Game::gameIterate() {
+   int logicalWidth, logicalHeight;
+   SDL_RendererLogicalPresentation mode;
+   if (!SDL_GetRenderLogicalPresentation(renderer, &logicalWidth, &logicalHeight, &mode)) {
+      SDL_Log("Failed to get logical presentation: %s", SDL_GetError());
+      return SDL_APP_FAILURE;
+   }
+
    Uint64 currentTick = SDL_GetTicks();
    deltaTime = (currentTick - lastTick) / 1000.0f;
    lastTick = currentTick;
 
-   int windowWidth, windowHeight;
-   std::tuple<int, int> winSize = getWindowSize();
-   windowWidth = std::get<0>(winSize);
-   windowHeight = std::get<1>(winSize);
-
    // Update camera to follow player
    Entity* player = findEntity("player");
-   if (player) {
+   if (player ) {
+      if (player->getIsMoving()) {
+         player->updateAnimation(deltaTime); // Update player animation
+
+      }
       updateCamera(player->getPosition());
    }
+
+   // Update enemy (if needed)
+   //Entity* enemy = findEntity("enemy");
+   //if (enemy) {
+   //   enemy->updateAnimation(deltaTime); // Update enemy animation (if it animates)
+   //}
 
    SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
    SDL_RenderClear(renderer);
 
    if (level) {
-      level->renderTiles(renderer, camera.getX(), camera.getY());
-
+      level->renderTiles(renderer, 0, 0);
    }
 
    // Render entities
    for (Entity* entity : entities) {
-      SpriteSheet* spriteSheet = entity->getSpriteSheet();
-      if (spriteSheet) {
-         int spriteRow = (entity == assetFactory->getEntity("player")) ? 1 : 2;
-         spriteSheet->selectCurrentSprite(spriteRow, 0);
-         SDL_FRect destRect = entity->getRect();
-         destRect.x -= camera.getX();
-         destRect.y -= camera.getY();
-         spriteSheet->drawSprite(renderer, destRect);
+      SpriteSheet* ss = entity->getSpriteSheet();
+      if (!ss) {
+         SDL_Log("Entity has no sprite sheet");
+         continue;
+      }
+
+      SDL_FRect destRect = entity->getRect();
+      cameraOffset(destRect, camera.getX(), camera.getY());
+      if (entity->getIsMoving() && entity->getDirection() != (int)Entity::Direction::LEFT) {
+         ss->drawSprite(renderer, destRect);
+
       }
       else {
-         SDL_Log("Entity has no sprite sheet");
+         ss->drawSpriteRotated(renderer, ss->getTexture(), destRect, entity->getDirection() == (int)Entity::Direction::LEFT ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
       }
+   }
+
+   if (isMenuing) {
+      std::string menuText = "Fight Run";
+      textManager->setText(menuText.c_str());
+      textManager->display(renderer, logicalWidth, logicalHeight, getOption());
    }
 
    if (isEditorMode) {
-      level->renderGrid(renderer);
+      level->renderGrid(renderer, camera.getX(), camera.getY());
    }
 
    if (showCollisionText) {
-      const char* testText = "This game is a work in progress. PLease be patient with me.";
-      textManager->setText(testText);
-      textManager->display(renderer, windowWidth, windowHeight);
+      std::string testText = "This game is a work in progress. Please be patient with me.";
+      textManager->setText(testText.c_str());
+      textManager->display(renderer, logicalWidth, logicalHeight, getOption());
    }
 
    SDL_RenderPresent(renderer);
    return SDL_APP_SUCCESS;
 }
-
 void Game::updateCamera(Position& target) {
+   int logicalWidth, logicalHeight;
+   SDL_RendererLogicalPresentation mode;
+   if (!SDL_GetRenderLogicalPresentation(renderer, &logicalWidth, &logicalHeight, &mode)) {
+      SDL_Log("Failed to get logical presentation: %s", SDL_GetError());
+      logicalWidth = 640;
+      logicalHeight = 480;
+   }
 
-   int windowWidth, windowHeight;
-   std::tuple<int, int> winSize = getWindowSize();
-   windowWidth = std::get<0>(winSize);
-   windowHeight = std::get<1>(winSize);
+   // Center the camera on the target (player) in logical coordinates
+   float cameraX = target.getX() - logicalWidth / 2.0f;
+   float cameraY = target.getY() - logicalHeight / 2.0f;
 
-   // Center the camera on the target (player)
-   float cameraX = target.getX() - windowWidth / 2.0f;
-   float cameraY = target.getY() - windowHeight / 2.0f;
-
-   cameraX = std::max(0.0f, std::min(cameraX, WORLD_WIDTH - windowWidth));
-   cameraY = std::max(0.0f, std::min(cameraY, WORLD_HEIGHT - windowHeight));
+   // Clamp camera to world bounds
+   cameraX = std::max(0.0f, std::min(cameraX, WORLD_WIDTH - logicalWidth));
+   cameraY = std::max(0.0f, std::min(cameraY, WORLD_HEIGHT - logicalHeight));
 
    camera.setX(cameraX);
    camera.setY(cameraY);
+
 }
 
 Entity* Game::findEntity(const std::string& name) {

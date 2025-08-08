@@ -9,8 +9,8 @@
 
 class Level : public Entity {
 private:
-   static const int WIDTH = 16;
-   static const int HEIGHT = 12;
+   static const int WIDTH = 20;
+   static const int HEIGHT = 15;
    Tile* level[WIDTH][HEIGHT];
    bool isPlacingWall = false;
    SpriteSheet* tileSpriteSheet = nullptr;
@@ -18,15 +18,15 @@ private:
 
 public:
   
-   Level(AssetFactory* af = nullptr) : assetFactory(af) {
+  /* Level(AssetFactory* af = nullptr) : assetFactory(af) {
       for (int x = 0; x < WIDTH; x++) {
          for (int y = 0; y < HEIGHT; y++) {
             level[x][y] = nullptr;
          }
       }
-   }
+   }*/
    // Constructor initializes the level with tiles using the provided AssetFactory.
-   //Level(AssetFactory* af = nullptr);
+   Level(AssetFactory* af = nullptr);
 
    ~Level() {
       for (int x = 0; x < WIDTH; x++) {
@@ -41,7 +41,7 @@ public:
       SDL_Log("AssetFactory set in Level: %p", assetFactory);
    }
    void renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY);
-   void renderGrid(SDL_Renderer* renderer);
+   void renderGrid(SDL_Renderer* renderer, float cameraX, float cameraY);
    void updateTile(SDL_Event& event, float cameraX, float cameraY); // Add camera parameters
    void saveToFile(const std::string& filename);
    void loadFromFile(const std::string& filename);

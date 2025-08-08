@@ -35,6 +35,8 @@ private:
    bool isEditorMode = false;
    bool isMenuing = false; 
 
+   std::string option = "default";
+
 public:
    Game();
    ~Game();
@@ -46,9 +48,19 @@ public:
    SDL_AppResult gameIterate();
    
 
+   void setEditorMode(bool mode) { isEditorMode = mode; }
+   bool getEditorMode() const { return isEditorMode; }
+   void setMenuing(bool menu) { isMenuing = menu; }
+   bool getMenuing() const { return isMenuing; }
+   void setShowCollisionText(bool show) { showCollisionText = show; }
+   bool getShowCollisionText() const { return showCollisionText; }
+   SDL_Renderer* getRenderer() const { return renderer; }
+   SDL_Window* getWindow() const { return window; }
    float getDeltaTime() const { return deltaTime; }
    void updateCamera(Position& target);
    Entity* findEntity(const std::string& name);
+   void setOption(const std::string& opt) { option = opt; }
+   std::string getOption() const { return option; }
 
    std::tuple<int, int> getWindowSize() const;
 };

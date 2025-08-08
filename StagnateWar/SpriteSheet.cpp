@@ -1,4 +1,5 @@
 #include "SpriteSheet.h"
+#include <string>
 // https://dev.to/noah11012/using-sdl2-spritesheets-46h5
 
 SpriteSheet::SpriteSheet(SDL_Texture* tex, int rows, int columns) : texture(tex) {
@@ -23,3 +24,7 @@ void SpriteSheet::drawSprite(SDL_Renderer* renderer, SDL_FRect& rect){
    SDL_RenderTexture(renderer, texture, &clip, &rect);
 }
 
+void SpriteSheet::drawSpriteRotated(SDL_Renderer* renderer,SDL_Texture* texture, SDL_FRect& rect, SDL_FlipMode flip) {
+  
+   SDL_RenderTextureRotated(renderer, texture, &clip, &rect, 0.0f, nullptr, flip);
+}
