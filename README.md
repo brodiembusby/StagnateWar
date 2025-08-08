@@ -27,4 +27,5 @@ This project is currently a work in progress. Development is ongoing, and additi
 
 ## Images
 
-![Work in progress image](./devImages/WIPimg1.png)
+![Work in progress image](./devImages
+/WIPimg1.png)
