@@ -277,6 +277,8 @@ namespace StagnateWar {
 
       if (level) {
          level->renderTiles(renderer, camera.getX(), camera.getY());  // Pass camera positions here
+         level2->renderTiles(renderer, camera.getX(), camera.getY());  // Pass camera positions here
+
       }
 
       // Render entities

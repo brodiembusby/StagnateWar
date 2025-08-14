@@ -19,8 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\vslib\json\single_include\nlohmann\json.hpp" />
-    <ClInclude Include="..\..\..\..\..\..\vslib\json\single_include\nlohmann\json_fwd.hpp" />
     <ClInclude Include="AssetFactory.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="Game.h" />
