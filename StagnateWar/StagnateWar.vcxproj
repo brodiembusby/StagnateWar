@@ -28,6 +28,7 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="PartyMember.h" />
     <ClInclude Include="Position.h" />
+    <ClInclude Include="Sprites.h" />
     <ClInclude Include="SpriteSheet.h" />
     <ClInclude Include="TextManager.h" />
     <ClInclude Include="Tile.h" />

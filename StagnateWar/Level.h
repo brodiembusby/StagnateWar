@@ -1,50 +1,32 @@
 #pragma once
-#include "Tile.h"
 #include <SDL3/SDL.h>
 #include "Entity.h"
-#include "AssetFactory.h"  
-#include "json.hpp"
-#include <fstream>
-#include <string>
+#include "Tile.h"
+#include "AssetFactory.h"
+#include "sprites.h"
+namespace StagnateWar {
+   class Level : public Entity {
+   private:
+      static const int WIDTH = 30;
+      static const int HEIGHT = 20;
+      Tile* level[WIDTH][HEIGHT];
+      bool isPlacingWall = false;
+      SpriteSheet* tileSpriteSheet = nullptr;
+      AssetFactory* assetFactory = nullptr;
+      int currentSpriteId = 0; // Current sprite ID for tile editing
 
-class Level : public Entity {
-private:
-   static const int WIDTH = 20;
-   static const int HEIGHT = 15;
-   Tile* level[WIDTH][HEIGHT];
-   bool isPlacingWall = false;
-   SpriteSheet* tileSpriteSheet = nullptr;
-   AssetFactory* assetFactory = nullptr; 
+   public:
 
-public:
-  
-  /* Level(AssetFactory* af = nullptr) : assetFactory(af) {
-      for (int x = 0; x < WIDTH; x++) {
-         for (int y = 0; y < HEIGHT; y++) {
-            level[x][y] = nullptr;
-         }
-      }
-   }*/
-   // Constructor initializes the level with tiles using the provided AssetFactory.
-   Level(AssetFactory* af = nullptr);
+      Level(const std::string& filename, AssetFactory* af, SpriteSheet* ts); // Updated constructor
+      ~Level();
 
-   ~Level() {
-      for (int x = 0; x < WIDTH; x++) {
-         for (int y = 0; y < HEIGHT; y++) {
-            delete level[x][y];
-         }
-      }
-      // Note: tileSpriteSheet is deleted in Game::gameQuit
-   }
-   void setAssetFactory(AssetFactory* af) {
-      assetFactory = af;
-      SDL_Log("AssetFactory set in Level: %p", assetFactory);
-   }
-   void renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY);
-   void renderGrid(SDL_Renderer* renderer, float cameraX, float cameraY);
-   void updateTile(SDL_Event& event, float cameraX, float cameraY); // Add camera parameters
-   void saveToFile(const std::string& filename);
-   void loadFromFile(const std::string& filename);
+      void setAssetFactory(AssetFactory* af) { assetFactory = af; }
+      void renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY);
+      void renderGrid(SDL_Renderer* renderer, float cameraX, float cameraY);
+      void loadFromFile(const std::string& filename);
+      void editorEvent(SDL_Event& event);
+      void setCurrentSpriteId(int id) { currentSpriteId = id; }
+      void setDefaultTile(int x, int y);
 
-   void editorEvent(SDL_Event& event);
-};
+   };
+}
