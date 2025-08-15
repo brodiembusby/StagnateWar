@@ -41,7 +41,7 @@ namespace StagnateWar {
                rowStr += std::to_string(val) + ", ";
             }
             if (!rowStr.empty()) rowStr.pop_back();
-            SDL_Log("Parsed Row %zu: %s", rowIndex, rowStr.c_str());
+            //SDL_Log("Parsed Row %zu: %s", rowIndex, rowStr.c_str());
             result.push_back(row);
             ++rowIndex;
          }
@@ -49,36 +49,33 @@ namespace StagnateWar {
       return result;
    }
    Level::Level(const std::string& filename, AssetFactory* af, SpriteSheet* ts) : assetFactory(af), tileSpriteSheet(ts) {
-      for (int x = 0; x < WIDTH; x++) {
-         for (int y = 0; y < HEIGHT; y++) {
-            level[x][y] = nullptr;
-            if (assetFactory) {
+
+      if (!assetFactory) {
+         SDL_Log("AssetFactory is null in Level constructor");
+      }
+      if (!tileSpriteSheet) {
+         SDL_Log("tileSpriteSheet is null in Level constructor");
+      }
+      // Load Level
+      if (!filename.empty()) {
+         SDL_Log("Loading level from file: %s", filename.c_str());
+         loadFromFile(filename);
+      }
+      // If no filename is provided, initialize a blank default level
+      else {
+         SDL_Log("No filename provided, initializing default level");
+         for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+               level[x][y] = nullptr;
                level[x][y] = dynamic_cast<Tile*>(assetFactory->createEntity("tile", Position(static_cast<float>(x), static_cast<float>(y))));
                if (level[x][y]) {
-                  Tile* tile = level[x][y];
-                  tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
-                  tile->setIsWalkable(true);
-                  tile->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-                  if (tileSpriteSheet) {
-                     tile->setSpriteSheet(tileSpriteSheet);
-                     tile->setSpriteCoords(Sprites::GrassPlain.x, Sprites::GrassPlain.y); // Set default sprite coords
-                  }
-                  else {
-                     SDL_Log("tileSpriteSheet is null during initialization at (%d, %d)", x, y);
-                  }
+                  setDefaultTile(x, y); // Set default tile properties
                }
                else {
-                  SDL_Log("Failed to create tile at (%d, %d)", x, y);
-                  setDefaultTile(x, y);
+                  SDL_Log("Failed to create tile at (%d, %d), using default", x, y);
                }
             }
-            else {
-               setDefaultTile(x, y);
-            }
          }
-      }
-      if (!filename.empty()) {
-         loadFromFile(filename); // Load the CSV immediately if filename is provided
       }
    }
 
@@ -95,27 +92,24 @@ namespace StagnateWar {
       }
    }
 
-   // Render the tiles in the level, adjusting for camera position.
+   // In Level::renderTiles, add a null check before dereferencing 'tile'
    void Level::renderTiles(SDL_Renderer* renderer, float cameraX, float cameraY) {
-      for (int y = 0; y < HEIGHT; y++) {
-         for (int x = 0; x < WIDTH; x++) {
+      for (int y = 0; y < HEIGHT; y++)
+      {
+         for (int x = 0; x < WIDTH; x++)
+         {
             Tile* tile = level[x][y];
-            if (tile) {
-               SDL_FRect rect = tile->getRect();
-               rect.x -= cameraX;
-               rect.y -= cameraY;
-               SpriteSheet* ss = tile->getSpriteSheet();
-               if (ss) {
-                  ss->selectCurrentSprite(static_cast<int>(tile->getSpriteX()), static_cast<int>(tile->getSpriteY()));
-                  ss->drawSprite(renderer, rect);
-               }
-               else {
-                  SDL_Log("No sprite sheet for tile at (%d, %d)", x, y);
-               }
-            }
-            else {
+            if (!tile) {
                SDL_Log("Null tile at (%d, %d)", x, y);
+               continue; // Prevent dereferencing a null pointer
             }
+            SpriteSheet* ss = tile->getSpriteSheet();
+            if (!ss)   SDL_Log("No sprite sheet for tile at (%d, %d)", x, y);
+            SDL_FRect rect = tile->getRect();
+            rect.x -= cameraX;
+            rect.y -= cameraY;
+            ss->selectCurrentSprite(static_cast<int>(tile->getSpriteX()), static_cast<int>(tile->getSpriteY()));
+            ss->drawSprite(renderer, rect);
          }
       }
    }
@@ -132,21 +126,6 @@ namespace StagnateWar {
          SDL_RenderLine(renderer, 0 - cameraX, y - cameraY, WORLD_WIDTH - cameraX, y - cameraY);
       }
 
-   }
-
-   void Level::setDefaultTile(int x, int y) {
-      level[x][y] = new Tile();
-      level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
-      level[x][y]->setIsWalkable(true);
-      level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-      if (tileSpriteSheet) {
-         level[x][y]->setSpriteSheet(tileSpriteSheet);
-         level[x][y]->setSpriteCoords(Sprites::GrassPlain.x, Sprites::GrassPlain.y);
-         SDL_Log("Set default tile (%d, %d) to GrassPlain (%f, %f)", x, y, Sprites::GrassPlain.x, Sprites::GrassPlain.y);
-      }
-      else {
-         SDL_Log("tileSpriteSheet is null in setDefaultTile at (%d, %d)", x, y);
-      }
    }
 
    void Level::loadFromFile(const std::string& filename) {
@@ -174,15 +153,9 @@ namespace StagnateWar {
                tile->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
                tile->setIsWalkable(it->second.isWalkable);
                tile->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-               if (tileSpriteSheet) {
-                  tile->setSpriteSheet(tileSpriteSheet);
-                  tile->setSpriteCoords(it->second.sprite.x, it->second.sprite.y); // Store sprite coords
-                  SDL_Log("Set tile (%d, %d) to sprite ID %d, coords (%f, %f)", x, y, spriteId, it->second.sprite.x, it->second.sprite.y);
-               }
-               else {
-                  SDL_Log("tileSpriteSheet is null at (%d, %d)", x, y);
-                  setDefaultTile(x, y);
-               }
+               tile->setSpriteSheet(tileSpriteSheet);
+               tile->setSpriteCoords(it->second.sprite.x, it->second.sprite.y); // Store sprite coords
+
             }
             else {
                SDL_Log("Invalid spriteId %d at (%d, %d), using default", spriteId, x, y);
@@ -192,4 +165,15 @@ namespace StagnateWar {
       }
       SDL_Log("Map loaded from %s", filename.c_str());
    }
+
+   void Level::setDefaultTile(int x, int y) {
+      level[x][y] = new Tile();
+      level[x][y]->setPosition(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT);
+      level[x][y]->setIsWalkable(true);
+      level[x][y]->setRect(x * DEFAULT_WIDTH, y * DEFAULT_HEIGHT, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+      level[x][y]->setSpriteSheet(tileSpriteSheet);
+      level[x][y]->setSpriteCoords(Sprites::GrassPlain.x, Sprites::GrassPlain.y);
+
+   }
+
 }

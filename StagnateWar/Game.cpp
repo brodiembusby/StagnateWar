@@ -135,26 +135,22 @@ namespace StagnateWar {
 
       assetFactory = new AssetFactory(renderer);
       SDL_Texture* tileTexture = assetFactory->loadTexture("TileSpriteSheet");
-      if (tileTexture) {
-         tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
-         if (tileSpriteSheet) {
-            SDL_Log("Tile sprite sheet created successfully");
-            level2 = new Level("assets/Basic_Top.csv",assetFactory, tileSpriteSheet); 
-            level = new Level("assets/Basic_Bottom.csv", assetFactory, tileSpriteSheet);
-
-
-         }
-         else {
-            SDL_Log("Failed to create tile sprite sheet");
-            return SDL_APP_FAILURE;
-         }
+      if (!tileTexture) {
+         SDL_Log("Failed to create tile sprite sheet");
+         return SDL_APP_FAILURE;
       }
-      else {
+
+      tileSpriteSheet = new SpriteSheet(tileTexture, 9, 9);
+      if (!tileSpriteSheet) {
          SDL_Log("Failed to load TileSpriteSheet texture");
          return SDL_APP_FAILURE;
       }
 
-      // Create and store entities
+      // Layers
+      level2 = new Level("assets/Level3_Top.csv", assetFactory, tileSpriteSheet);
+      level = new Level("assets/Level3_Bottom.csv", assetFactory, tileSpriteSheet);
+
+      // Create and store entities Fix later
       Entity* player = assetFactory->createEntity("player", (100, 100));
       if (player) {
          entities.push_back(player);
@@ -163,7 +159,6 @@ namespace StagnateWar {
          SDL_Log("Failed to create player entity");
          return SDL_APP_FAILURE;
       }
-
       Entity* enemy = assetFactory->createEntity("enemy", (200, 100));
       if (enemy) {
          entities.push_back(enemy);

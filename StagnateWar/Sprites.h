@@ -14,67 +14,80 @@ namespace StagnateWar {
 
    namespace  Sprites {
 
+      constexpr Sprite Nothing = { 9, 9 };
+
       // Tile Grass constexpr SPRITEs
-      constexpr Sprite GrassPlain = { 0, 4 };
+      constexpr Sprite GrassPlain = { 0, 2 };
       constexpr Sprite GrassCorner1 = { 0, 0 };
       constexpr Sprite GrassCorner2 = { 1, 0 };
       constexpr Sprite GrassCorner3 = { 0, 1 };
       constexpr Sprite GrassCorner4 = { 1, 1 };
 
+      constexpr Sprite AutumnGrassPlain = { 1, 2 };
+      constexpr Sprite AutmnGrassCorner1 = { 2, 0 };
+      constexpr Sprite AutmnGrassCorner2 = { 3,0 };
+      constexpr Sprite AutmnGrassCorner3 = { 2, 1 };
+      constexpr Sprite AutmnGrassCorner4 = { 3, 1 };
 
-      constexpr Sprite Nothing = { 9, 9 };
+      constexpr Sprite PharohGrassPlain = { 7, 5 };
+      constexpr Sprite PharohGrassCorner1 = { 7, 3 };
+      constexpr Sprite PharohGrassCorner2 = { 8, 3 };
+      constexpr Sprite PharohGrassCorner3 = { 7, 4 };
+      constexpr Sprite PharohGrassCorner4 = { 8, 4 };
 
+      // Dirt constexpr Sprites
+      constexpr Sprite DirtPlain = { 3, 2 };
+      constexpr Sprite DirtRock = { 2, 2 };
 
-      constexpr Sprite GrassNoDCorner1 = { 2, 0 };
-      constexpr Sprite GrassNoDCorner2 = { 3, 0 };
-      constexpr Sprite GrassNoDCorner3 = { 2, 1 };
-      constexpr Sprite GrassNoDCorner4 = { 3, 1 };
+      constexpr Sprite AutumnDirtPlain = { 5, 3 };
+      constexpr Sprite AutumnDirtRock = { 6, 3 };
 
-      constexpr Sprite AutumnPlain = { 1, 4 };
-      constexpr Sprite AutumnCorner1 = { 0, 2 };
-      constexpr Sprite AutumnCorner2 = { 1, 2 };
-      constexpr Sprite AutumnCorner3 = { 1, 3 };
-      constexpr Sprite AutumnCorner4 = { 0, 3 };
+      constexpr Sprite PharohDirtPlain = { 5, 4 };
+      constexpr Sprite PharohDirtRock = { 6, 4 };
 
-      constexpr Sprite DirtPlain = { 2, 4 };
-      constexpr Sprite DirtRock = { 2, 3 };
+      // Miscellaneous constexpr Sprites (Trees, Rocks, Fences)
+      constexpr Sprite TreeBottom = { 6, 0 };
+      constexpr Sprite TreeTop = { 6, 1 };
 
-      //Miscellaneous constexpr Sprites(Trees, Rocks, Fences)
-      constexpr Sprite TreeBottom = { 0, 7 };
-      constexpr Sprite TreeTop = { 0, 6 };
-      constexpr Sprite Rocks = { 1, 7 };
-      constexpr Sprite Fence = { 2, 7 };
-      constexpr Sprite FenceLeft = { 2, 8 };
-      constexpr Sprite FenceRight = { 3, 8 };
+      constexpr Sprite PharohTreeBottom = { 0, 6 };
+      constexpr Sprite PharohTreeTop = { 0, 5 };
 
-      //House
-      constexpr Sprite HouseTopLeft = { 3, 6 };
-      constexpr Sprite HouseTopRight = { 4, 6 };
-      constexpr Sprite HouseBottomLeft = { 3, 7 };
-      constexpr Sprite HouseBottomRight = { 4, 7 };
+      constexpr Sprite AutmnTreeBottom = { 0, 4 };
+      constexpr Sprite AutmnTreeTop = { 0, 3 };
+
+      constexpr Sprite Rocks = { 5, 2 };
+      constexpr Sprite Fence = { 6, 2 };
+      constexpr Sprite FenceLeft = { 7, 2 };
+      constexpr Sprite FenceRight = { 8, 2 };
+
+      // House
+      constexpr Sprite HouseTopLeft = { 7, 0 };
+      constexpr Sprite HouseTopRight = { 8, 0 };
+      constexpr Sprite HouseBottomLeft = { 7, 1 };
+      constexpr Sprite HouseBottomRight = { 8, 1 };
+
+      constexpr Sprite AutumnHouse1 = { 3, 3 };
+      constexpr Sprite AutumnHouse2 = { 4, 3 };
+      constexpr Sprite AutumnHouse3 = { 3, 4 };
+      constexpr Sprite AutumnHouse4 = { 4, 4 };
+
+      constexpr Sprite PharohHouse1 = { 3, 5 };
+      constexpr Sprite PharohHouse2 = { 4, 5 };
+      constexpr Sprite PharohHouse3 = { 3, 6 };
+      constexpr Sprite PharohHouse4 = { 4, 6 };
 
       // Water constexpr Sprites
-      constexpr Sprite WaterPlain = { 2, 2 };
-      constexpr Sprite WaterCorner1 = { 4, 1 };
+      constexpr Sprite WaterPlain = { 4, 1 };
+      constexpr Sprite WaterCorner1 = { 4, 0 };
       constexpr Sprite WaterCorner2 = { 5, 0 };
-      constexpr Sprite WaterCorner3 = { 4, 1 };
-      constexpr Sprite WaterCorner4 = { 5, 0 };
+      constexpr Sprite WaterCorner4 = { 5, 1 };
+      constexpr Sprite WaterCorner3 = { 4, 2 };
 
-      // Player constexpr Sprites
-      constexpr Sprite playerStand = { 0, 0 };
-      constexpr Sprite playerWalk1 = { 0, 1 };
-      constexpr Sprite playerWalk2 = { 0, 2 };
-      constexpr Sprite playerWalk3 = { 0, 3 };
+      constexpr Sprite MurkyWaterPlain = { 1, 4 };
+      constexpr Sprite MurkyWaterCorner1 = { 1, 3 };
+      constexpr Sprite MurkyWaterCorner2 = { 2, 3 };
+      constexpr Sprite MurkyWaterCorner3 = { 2, 4 };
 
-      constexpr Sprite playerForward1 = { 0, 4 };
-      constexpr Sprite playerForward2 = { 0, 5 };
-      constexpr Sprite playerForward3 = { 0, 6 };
-      constexpr Sprite playerForward4 = { 0, 7 };
-
-      constexpr Sprite playerBack1 = { 0, 7 };
-      constexpr Sprite playerBack2 = { 0, 8 };
-      constexpr Sprite playerBack3 = { 0, 9 };
-      constexpr Sprite playerBack4 = { 0, 10 };
 
       struct  SpriteMapping {
          Sprite  sprite;
@@ -84,39 +97,75 @@ namespace StagnateWar {
       // This is a mess i know its from the editor I used to make the map
       const std::unordered_map<int, SpriteMapping> SpriteMap = {
          {-1, {Nothing, true}},
-         {36, {GrassPlain, true}},
+
+         {18, {GrassPlain, true}},
          {0, {GrassCorner1, true}},
          {1, {GrassCorner2, true}},
          {9, {GrassCorner3, true}},
          {10, {GrassCorner4, true}},
 
-         {2, {GrassNoDCorner1, true}},
-         {3, {GrassNoDCorner2, true}},
-         {11, {GrassNoDCorner3, true}},
-         {12, {GrassNoDCorner4, true}},
-         {37, {AutumnPlain, true}},
+         {2,  {AutmnGrassCorner1, true}},
+         {3,  {AutmnGrassCorner2, true}},
+         {11, {AutmnGrassCorner3, true}},
+         {12, {AutmnGrassCorner4, true}},
+         {19, {AutumnGrassPlain, true}},
 
-         {63, {TreeBottom, false}},
-         {54, {TreeTop, false}},
-
-         {64, {Rocks, false}},
-         {65, {Fence, false}},
-         {74, {FenceLeft, false}},
-         {75, {FenceRight, false}},
-
-         {38, {DirtPlain, true}},
-         {29, {DirtRock, false}},
-
-         {20, {WaterPlain, false}},
-         {4,  {WaterCorner1, true}},
+         {13, {WaterPlain, false}},
+         {4, {WaterCorner1, true}},
          {5,  {WaterCorner2, true}},
-         {13, {WaterCorner3, true}},
-         {14, {WaterCorner4, true}},
+         {14, {WaterCorner3, true}},
+         {22, {WaterCorner4, true}},
 
-         {57, {HouseTopLeft, false}},
-         {58, {HouseTopRight, false}},
-         {66, {HouseBottomLeft, false}},
-         {67, {HouseBottomRight, false}},
+         {6, {TreeBottom, false}},
+         {15, {TreeTop, false}},
+
+         {45, {PharohTreeTop, false}},
+         {54, {PharohTreeBottom, false}},
+
+         {36, {AutmnTreeBottom, false}},
+         {27, {AutmnTreeTop, false}},
+
+         {7, {HouseTopLeft, false}},
+         {8, {HouseTopRight, false}},
+         {16, {HouseBottomLeft, false}},
+         {17, {HouseBottomRight, false}},
+
+         {23, {Rocks, false}},
+         {24, {Fence, false}},
+         {25, {FenceLeft, false}},
+         {26, {FenceRight, false}},
+
+         {21, {DirtPlain, true}},
+         {20, {DirtRock, true}},
+
+
+         {32, {AutumnDirtPlain, true}},
+         {33, {AutumnDirtRock, true}},
+
+         {41, {PharohDirtPlain, true}},
+         {42, {PharohDirtRock, true}},
+
+         {30, {AutumnHouse1, false}},
+         {31, {AutumnHouse2, false}},
+         {39, {AutumnHouse3, false}},
+         {40, {AutumnHouse4, false}},
+
+         {48, {PharohHouse1, false}},
+         {49, {PharohHouse2, false}},
+         {57, {PharohHouse3, false}},
+         {58, {PharohHouse4, false}},
+
+         {52, {PharohGrassPlain, true}},
+         {34, {PharohGrassCorner1, true}},
+         {35, {PharohGrassCorner2, true}},
+         {43, {PharohGrassCorner3, true}},
+         {44, {PharohGrassCorner4, true}},
+
+         {37, {MurkyWaterPlain, true}},
+         {28, {MurkyWaterCorner1, true}},
+         {29, {MurkyWaterCorner2, true}},
+         {38, {MurkyWaterCorner3, true}},
+
       };
    }
 }
