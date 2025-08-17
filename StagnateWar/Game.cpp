@@ -147,8 +147,8 @@ namespace StagnateWar {
       }
 
       // Layers
-      level2 = new Level("assets/Level3_Top.csv", assetFactory, tileSpriteSheet);
-      level = new Level("assets/Level3_Bottom.csv", assetFactory, tileSpriteSheet);
+      level2 = new Level("assets/Level2_Top.csv", assetFactory, tileSpriteSheet);
+      level = new Level("assets/Level2_Bottom.csv", assetFactory, tileSpriteSheet);
 
       // Create and store entities Fix later
       Entity* player = assetFactory->createEntity("player", (100, 100));
