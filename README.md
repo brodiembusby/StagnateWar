@@ -28,3 +28,6 @@ This project is currently a work in progress. Development is ongoing, and additi
 ## Images
 
 ![Work in progress image](./StagnateWar/devImages/WIPimg1.png)
+![Level1](./StagnateWar/devImages/Level1.png)
+![Level2](./StagnateWar/devImages/Level2.png)
+![Level3](./StagnateWar/devImages/Level3.png)
